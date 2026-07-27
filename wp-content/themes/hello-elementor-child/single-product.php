@@ -88,13 +88,13 @@ $_theme_img = get_stylesheet_directory_uri() . '/img';
 $category_images = array(
 	'laboratory-testing'          => $_theme_img . '/8190v_w140.jpg',
 	'near-patient-testing'        => $_theme_img . '/se_1520.jpg',
-	'urinalysis'                  => $_theme_img . '/se_1520.jpg',
-	'urinalysis_urine_testing'    => $_theme_img . '/se_1520.jpg',
+	'urinalysis'                  => $_theme_img . '/ha-8180v_w140.png',
+	'urinalysis_urine_testing'    => $_theme_img . '/ha-8180v_w140.png',
 	'bgm'                         => $_theme_img . '/GLUCOCARD-S_140.jpg',
 	'oral-care'                   => $_theme_img . '/st4910_140_e.jpg',
 	'veterinary-others'           => $_theme_img . '/RT-4010_130px.jpg',
 	'immunodiagnostic-products'   => $_theme_img . '/Crystal_HBsAg1_w140.jpg',
-	'clinical-chemistry-reagents' => $_theme_img . '/Coagulation-Reagents-New_140.jpg',
+	'clinical-chemistry-reagents' => $_theme_img . '/om-6070_w140.png',
 	'primary-health-care'         => $_theme_img . '/thelab004_130.jpg',
 );
 
