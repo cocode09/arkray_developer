@@ -1,1 +1,1 @@
-# arkray_developer is me
+# arkray_developer
