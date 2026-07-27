@@ -31,12 +31,12 @@ $uploads_dir  = WP_CONTENT_DIR . '/uploads/TOPページimg';
 $uploads_url  = content_url( '/uploads/TOPページimg' );
 $slide_defs   = array(
 	array( 'file' => 'kyoto_lab.jpg',          'alt' => 'ARKRAY Kyoto Laboratory',              'url' => $about_page_url ),
-	array( 'file' => 'laboratory.jpg',         'alt' => 'Main Research Center, Kyoto Japan',    'url' => $about_page_url ),
-	array( 'file' => 'ha-8190v.jpg',           'alt' => 'HA-8190V',                             'url' => $products_page_url ),
-	array( 'file' => 'ha-8380v.jpg',           'alt' => 'HA-8380V',                             'url' => $products_page_url ),
-	array( 'file' => 'ae-4070.png',            'alt' => 'Aution Eleven AE-4070',                'url' => $products_page_url ),
-	array( 'file' => 'aiI-4510-ax-4060.png',   'alt' => 'Aution MAX AX-4060',                   'url' => $products_page_url ),
-	array( 'file' => 'om-6070.jpg',            'alt' => 'OSMO STATION OM-6070',                 'url' => $products_page_url ),
+	array( 'file' => 'laboratory.jpg',         'alt' => 'Main Research Center, Kyoto Japan',    'url' => esc_url( arkray_home_url( '/events_gallery/gallery/yousuien/' ) ) ),
+	array( 'file' => 'ha-8190v.jpg',           'alt' => 'HA-8190V',                             'url' => ( $p = arkray_get_product_post_by_slug( 'ha-8190v' ) ) ? esc_url( get_permalink( $p->ID ) ) : $products_page_url ),
+	array( 'file' => 'aiI-4510-ax-4060.png',   'alt' => 'Aution MAX AX-4060',                   'url' => ( $p = arkray_get_product_post_by_slug( 'ai-4510' ) ) ? esc_url( get_permalink( $p->ID ) ) : $products_page_url ),
+	array( 'file' => 'ae-4070.png',            'alt' => 'Aution Eleven AE-4070',                'url' => ( $p = arkray_get_product_post_by_slug( 'ae-4070' ) ) ? esc_url( get_permalink( $p->ID ) ) : $products_page_url ),
+	array( 'file' => 'om-6070.jpg',            'alt' => 'OSMO STATION OM-6070',                 'url' => ( $p = arkray_get_product_post_by_slug( 'om-6070' ) ) ? esc_url( get_permalink( $p->ID ) ) : $products_page_url ),
+	array( 'file' => 'ha-8380v.jpg',           'alt' => 'HA-8380V',                             'url' => ( $p = arkray_get_product_post_by_slug( 'ha-8380v' ) ) ? esc_url( get_permalink( $p->ID ) ) : $products_page_url ),
 );
 $slides = array();
 foreach ( $slide_defs as $slide_def ) {
