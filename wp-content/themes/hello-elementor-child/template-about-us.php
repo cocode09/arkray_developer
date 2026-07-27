@@ -332,14 +332,10 @@ wp_head();
 
 		<?php endif; ?>
 
-		<?php if ( ! $has_external && 'about-us' === $about_slug && $uses_editor_content ) : ?>
-			<?php
-			if ( '' !== $about_body_html ) {
-				echo $about_body_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- admin-authored page content.
-			}
-			?>
-		<?php elseif ( ! $has_external && 'about-us' === $about_slug ) : ?>
-			<?php // ── Landing page: about_index grid of all sub-page tiles ──── ?>
+		<?php if ( ! $has_external && 'about-us' === $about_slug && $uses_editor_content && '' !== $about_body_html ) : ?>
+			<?php echo $about_body_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- admin-authored page content. ?>
+		<?php elseif ( ! $has_external && 'about-us' === $about_slug && ! $uses_editor_content ) : ?>
+			<?php // ── Landing fallback grid when the page editor is empty ──────── ?>
 			<div class="about_index cf">
 				<div class="column">
 					<h2><a href="<?php echo $philosophy_url; ?>"<?php echo $sub_ac("arkray-philosophy"); ?>><?php echo esc_html( arkray_t( 'ARKRAY Philosophy' ) ); ?></a></h2>
