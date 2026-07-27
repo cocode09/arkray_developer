@@ -4403,6 +4403,29 @@ function arkray_redirect_legacy_events_gallery_detail_url() {
 add_action( 'template_redirect', 'arkray_redirect_legacy_events_gallery_detail_url', -12 );
 
 /**
+ * Redirect legacy Event CPT detail URLs to nested Events & Gallery routes.
+ */
+function arkray_redirect_legacy_event_detail_url() {
+	if ( is_admin() || ! is_singular( 'event' ) ) {
+		return;
+	}
+
+	$request_relative_path = trim( arkray_get_request_relative_path(), '/' );
+	if ( preg_match( '#events_gallery/events/#', $request_relative_path ) ) {
+		return;
+	}
+
+	$post = get_queried_object();
+	if ( ! ( $post instanceof WP_Post ) || '' === $post->post_name ) {
+		return;
+	}
+
+	wp_safe_redirect( arkray_get_events_gallery_event_url( $post->post_name ), 301 );
+	exit;
+}
+add_action( 'template_redirect', 'arkray_redirect_legacy_event_detail_url', -12 );
+
+/**
  * Prevent 404 for virtual Events & Gallery routes.
  *
  * @param bool     $preempt  Whether to short-circuit 404 handling.
@@ -4711,6 +4734,29 @@ function arkray_gallery_permalink( $permalink, $post ) {
 	return arkray_home_url( '/events_gallery/gallery/' . $post->post_name . '/' );
 }
 add_filter( 'post_type_link', 'arkray_gallery_permalink', 20, 2 );
+
+/**
+ * Public URL for an Event detail post (language-prefixed).
+ *
+ * Event details live under Events & Gallery at
+ * /events_gallery/events/{slug}/ rather than the native /events/{slug}/ CPT path.
+ *
+ * @param string  $permalink Default permalink.
+ * @param WP_Post $post      Event post.
+ * @return string
+ */
+function arkray_event_permalink( $permalink, $post ) {
+	if ( ! ( $post instanceof WP_Post ) || 'event' !== $post->post_type ) {
+		return $permalink;
+	}
+
+	if ( '' === $post->post_name ) {
+		return $permalink;
+	}
+
+	return arkray_home_url( '/events_gallery/events/' . $post->post_name . '/' );
+}
+add_filter( 'post_type_link', 'arkray_event_permalink', 26, 2 );
 
 /**
  * Register language-prefixed Gallery detail rewrite rules.
