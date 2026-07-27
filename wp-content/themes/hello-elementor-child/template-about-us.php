@@ -81,17 +81,18 @@ $about_subpage_map = array(
 );
 
 $about_h1_title = 'About Us';
-$about_body_html = '';
 if ( isset( $about_subpage_map[ $about_slug ] ) ) {
 	$about_h1_title = $about_subpage_map[ $about_slug ][0];
 }
 
-// Prefer live-imported content when an External Content URL is set on the
-// current page (ARKRAY External Content plugin). Otherwise use this page's
-// editor content (post_content), then fall back to the static postmeta body
-// on page 9 when the page editor is empty or the fetch fails.
-$queried_id   = get_queried_object_id();
-$content_id   = $queried_id;
+// Resolve body HTML: the page editor overrides imported fallbacks. When an admin
+// clears the External Content URL and updates the page, render blank instead of
+// falling back to cached external content or legacy postmeta on page 9.
+$queried_id          = get_queried_object_id();
+$content_id          = $queried_id;
+$about_body_html     = '';
+$uses_editor_content = false;
+
 if ( function_exists( 'arkray_get_about_subpage_id' ) ) {
 	$subpage_content_id = arkray_get_about_subpage_id( $about_slug );
 	if ( $subpage_content_id ) {
@@ -103,13 +104,42 @@ if ( function_exists( 'arkray_get_about_subpage_id' ) ) {
 		}
 	}
 }
+
+$content_page = $content_id ? get_post( $content_id ) : null;
+$editor_html  = ( $content_page instanceof WP_Post ) ? (string) $content_page->post_content : '';
+
 $external_url = ( $content_id && function_exists( 'get_field' ) )
-	? (string) get_field( 'external_content_url', $content_id )
+	? trim( (string) get_field( 'external_content_url', $content_id ) )
 	: '';
+$has_import_source     = '' !== $external_url;
+$import_settings_saved = (bool) get_post_meta( $content_id, '_arkray_external_content_configured', true );
+$config_at             = (int) get_post_meta( $content_id, '_arkray_external_content_configured_at', true );
+$modified_at           = ( $content_page instanceof WP_Post ) ? strtotime( $content_page->post_modified_gmt ) : 0;
+$editor_saved_after_import_settings = $config_at > 0 && $modified_at > ( $config_at + 5 );
+
+if ( ! $has_import_source && $import_settings_saved && ! $editor_saved_after_import_settings ) {
+	// Cleared import URL — ignore stale migration placeholders until the page editor
+	// is saved again after the External Content settings were updated.
+	$uses_editor_content = true;
+	$about_body_html     = '';
+} elseif ( '' !== trim( $editor_html ) ) {
+	// Imported editor_area markup is already complete HTML. Running wpautop
+	// here would make the public body differ from what the admin edits.
+	$about_body_html     = do_shortcode( $editor_html );
+	$uses_editor_content = true;
+} elseif ( $content_page instanceof WP_Post && strtotime( $content_page->post_modified_gmt ) > strtotime( $content_page->post_date_gmt ) + 60 ) {
+	// Page was updated after its initial publish with an empty editor.
+	// Only treat that as an intentional blank override when no import source
+	// is configured; saving ACF fields alone must not block external content.
+	if ( ! $has_import_source ) {
+		$uses_editor_content = true;
+	}
+}
+
 $group_page_keys = function_exists( 'arkray_get_group_about_page_keys' )
 	? arkray_get_group_about_page_keys()
 	: array( 'arkray-group', 'arkray-group-2', 'arkray-group-3', 'arkray-group-4', 'arkray-group-5' );
-if ( '' !== $external_url && function_exists( 'arkray_get_external_content' ) && 'history' !== $about_slug && ! in_array( $about_slug, $group_page_keys, true ) ) {
+if ( ! $uses_editor_content && '' !== $external_url && function_exists( 'arkray_get_external_content' ) && 'history' !== $about_slug && ! in_array( $about_slug, $group_page_keys, true ) ) {
 	$external_base = (string) get_field( 'external_content_base_url', $content_id );
 	$external_ttl  = (int) get_field( 'external_content_cache_hours', $content_id );
 	$about_body_html = arkray_get_external_content(
@@ -120,16 +150,8 @@ if ( '' !== $external_url && function_exists( 'arkray_get_external_content' ) &&
 		)
 	);
 }
-if ( '' === $about_body_html && isset( $about_subpage_map[ $about_slug ] ) ) {
-	if ( $content_id ) {
-		$page_post = get_post( $content_id );
-		if ( $page_post instanceof WP_Post && '' !== trim( $page_post->post_content ) ) {
-			$about_body_html = apply_filters( 'the_content', $page_post->post_content );
-		}
-	}
-	if ( '' === $about_body_html && ! in_array( $about_slug, $group_page_keys, true ) ) {
-		$about_body_html = (string) get_post_meta( 9, $about_subpage_map[ $about_slug ][1], true );
-	}
+if ( ! $uses_editor_content && '' === $about_body_html && isset( $about_subpage_map[ $about_slug ] ) && ! in_array( $about_slug, $group_page_keys, true ) ) {
+	$about_body_html = (string) get_post_meta( 9, $about_subpage_map[ $about_slug ][1], true );
 }
 
 // When this page imports external content (e.g. a standalone page that is not
@@ -310,7 +332,13 @@ wp_head();
 
 		<?php endif; ?>
 
-		<?php if ( ! $has_external && 'about-us' === $about_slug ) : ?>
+		<?php if ( ! $has_external && 'about-us' === $about_slug && $uses_editor_content ) : ?>
+			<?php
+			if ( '' !== $about_body_html ) {
+				echo $about_body_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- admin-authored page content.
+			}
+			?>
+		<?php elseif ( ! $has_external && 'about-us' === $about_slug ) : ?>
 			<?php // ── Landing page: about_index grid of all sub-page tiles ──── ?>
 			<div class="about_index cf">
 				<div class="column">

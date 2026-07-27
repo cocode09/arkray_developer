@@ -175,6 +175,43 @@ function arkray_unwrap_external_editor_area( $html ) {
 	return $html;
 }
 
+add_action( 'acf/save_post', 'arkray_ext_on_acf_save', 20 );
+
+/**
+ * Track external-content settings saves and bust front-end caches.
+ *
+ * ACF field saves do not always update post_modified, so templates use
+ * `_arkray_external_content_configured` to honor a cleared import URL.
+ *
+ * @param int|string $post_id Saved post ID.
+ * @return void
+ */
+function arkray_ext_on_acf_save( $post_id ) {
+	$post_id = (int) $post_id;
+	if ( $post_id <= 0 || 'page' !== get_post_type( $post_id ) ) {
+		return;
+	}
+
+	if ( ! function_exists( 'get_field' ) ) {
+		return;
+	}
+
+	// Only run when this page's External Content field group was part of the save.
+	$has_field = metadata_exists( 'post', $post_id, 'external_content_url' )
+		|| metadata_exists( 'post', $post_id, '_external_content_url' );
+	if ( ! $has_field ) {
+		return;
+	}
+
+	update_post_meta( $post_id, '_arkray_external_content_configured', '1' );
+	update_post_meta( $post_id, '_arkray_external_content_configured_at', time() );
+
+	if ( function_exists( 'wp_cache_post_change' ) ) {
+		wp_cache_post_change( $post_id );
+	}
+	clean_post_cache( $post_id );
+}
+
 add_shortcode( 'arkray_external_content', 'arkray_ext_content_shortcode' );
 
 /**
