@@ -38,6 +38,7 @@ $group3_url         = esc_url( arkray_get_about_page_url( 'arkray-group-3' ) );
 $group4_url         = esc_url( arkray_get_about_page_url( 'arkray-group-4' ) );
 $group5_url         = esc_url( arkray_get_about_page_url( 'arkray-group-5' ) );
 $action_guide_url   = esc_url( arkray_get_about_page_url( 'arkray-action-guidelines' ) );
+$sustainable_procurement_url = esc_url( arkray_get_about_page_url( 'sustainable-procurement-standards' ) );
 $company_profile_pdf = esc_url( 'https://www.arkray.co.jp/english/corpo/profile_e.pdf' );
 
 // ── Current sub-page slug routing ──────────────────────────────────────────
@@ -339,38 +340,42 @@ wp_head();
 					<h2><a href="<?php echo $philosophy_url; ?>"<?php echo $sub_ac("arkray-philosophy"); ?>><?php echo esc_html( arkray_t( 'ARKRAY Philosophy' ) ); ?></a></h2>
 					<p><a href="<?php echo $philosophy_url; ?>"<?php echo $sub_ac("arkray-philosophy"); ?>><img src="<?php echo esc_url( $theme_img_uri . '/about10.jpg' ); ?>" alt="ARKRAY Philosophy" width="350" height="80"></a></p>
 				</div>
-			</div>
-
-			<div class="about_index cf">
 				<div class="column">
 					<h2><a href="<?php echo $message_url; ?>"<?php echo $sub_ac("message-from-arkray"); ?>><?php echo esc_html( arkray_t( 'Message from ARKRAY' ) ); ?></a></h2>
 					<p><a href="<?php echo $message_url; ?>"<?php echo $sub_ac("message-from-arkray"); ?>><img src="<?php echo esc_url( $theme_img_uri . '/about01.jpg' ); ?>" alt="Message from ARKRAY" width="350" height="80"></a></p>
 				</div>
+			</div>
+
+			<div class="about_index cf">
 				<div class="column">
 					<h2><a href="<?php echo $concept_url; ?>"<?php echo $sub_ac("brand-concept"); ?>><?php echo esc_html( arkray_t( 'Brand Concept' ) ); ?></a></h2>
 					<p><a href="<?php echo $concept_url; ?>"<?php echo $sub_ac("brand-concept"); ?>><img src="<?php echo esc_url( $theme_img_uri . '/about03.jpg' ); ?>" alt="Brand Concept" width="350" height="80"></a></p>
 				</div>
-			</div>
-
-			<div class="about_index cf">
 				<div class="column">
 					<h2><a href="<?php echo $profile_url; ?>"<?php echo $sub_ac("about-contact"); ?>><?php echo esc_html( arkray_t( 'Contact' ) ); ?></a></h2>
 					<p><a href="<?php echo $profile_url; ?>"<?php echo $sub_ac("about-contact"); ?>><img src="<?php echo esc_url( $theme_img_uri . '/about04.jpg' ); ?>" alt="Corporate Profile" width="350" height="80"></a></p>
 				</div>
+			</div>
+
+			<div class="about_index cf">
 				<div class="column">
 					<h2><a href="<?php echo $business_url; ?>"<?php echo $sub_ac("corporate-outline"); ?>><?php echo esc_html( arkray_t( 'Corporate Outline' ) ); ?></a></h2>
 					<p><a href="<?php echo $business_url; ?>"<?php echo $sub_ac("corporate-outline"); ?>><img alt="English_bnr-100.jpg" src="<?php echo esc_url( $theme_img_uri . '/English_bnr-100.jpg' ); ?>" width="350" height="80"></a></p>
+				</div>
+				<div class="column">
+					<h2><a href="<?php echo $history_about_url; ?>"<?php echo $sub_ac("history"); ?>><?php echo esc_html( arkray_t( 'History' ) ); ?></a></h2>
+					<p><a href="<?php echo $history_about_url; ?>"<?php echo $sub_ac("history"); ?>><img src="<?php echo esc_url( $theme_img_uri . '/about05.jpg' ); ?>" alt="History" width="350" height="80"></a></p>
 				</div>
 			</div>
 
 			<div class="about_index cf">
 				<div class="column">
-					<h2><a href="<?php echo $history_about_url; ?>"<?php echo $sub_ac("history"); ?>><?php echo esc_html( arkray_t( 'History' ) ); ?></a></h2>
-					<p><a href="<?php echo $history_about_url; ?>"<?php echo $sub_ac("history"); ?>><img src="<?php echo esc_url( $theme_img_uri . '/about05.jpg' ); ?>" alt="History" width="350" height="80"></a></p>
-				</div>
-				<div class="column">
 					<h2><a href="<?php echo $group_url; ?>"<?php echo $sub_ac("arkray-group"); ?>><?php echo esc_html( arkray_t( 'ARKRAY Group' ) ); ?></a></h2>
 					<p><a href="<?php echo $group_url; ?>"<?php echo $sub_ac("arkray-group"); ?>><img src="<?php echo esc_url( $theme_img_uri . '/about06.jpg' ); ?>" alt="ARKRAY Group" width="350" height="80"></a></p>
+				</div>
+				<div class="column">
+					<h2><a href="<?php echo $sustainable_procurement_url; ?>"><span class="font_size01"><?php echo esc_html( arkray_t( 'Sustainable Procurement Standards' ) ); ?></span></a></h2>
+					<p><a href="<?php echo $sustainable_procurement_url; ?>"><img alt="sustainability.jpg" src="https://www.arkray.co.jp/english/upload/img/sustainability.jpg" width="350" height="80" class="mt-image-none" /></a></p>
 				</div>
 			</div>
 
