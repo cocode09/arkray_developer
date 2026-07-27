@@ -1,0 +1,2236 @@
+#pankuzu ul {
+	text-align: right;
+	font-size: 11px;
+	margin-bottom: 5px;
+}
+
+#pankuzu ul li {
+	display: inline-block;
+	margin-right: 0px;
+}
+
+#pankuzu ul li:after {
+	content: "\3E";
+	margin-left: 5px;
+}
+
+#pankuzu ul li:last-child:after {
+	content: none;
+}
+
+#pankuzu ul li:last-child {
+	color: #000;
+	font-weight: bold;
+}
+
+.hide {
+	display: none;
+}
+
+.align_c {
+	text-align: center;
+}
+
+.align_r {
+	text-align: right;
+}
+
+.tx {
+	margin-bottom: 15px;
+}
+
+.txb {
+	margin-bottom: 40px;
+}
+
+.txc {
+	margin-bottom: 30px;
+}
+
+.bold {
+	font-weight: bold;
+}
+
+.ex {
+	padding-right: 12px;
+	background: url(../img/ico_ex.png) center right no-repeat;
+}
+
+.right_img {
+	display: inline-block;
+	float: right;
+	padding: 0 0 20px 20px;
+}
+.sp .right_img {
+	float: none;
+	display: block;
+	padding: 0 0 20px 0px;
+	text-align: center;
+}
+
+#content_wrapper {
+	width: 940px;
+	margin: 0 auto;
+	padding-bottom: 20px;
+}
+.tablet #content_wrapper {
+	width: 720px;
+	padding: 0 10px;
+}
+.sp #content_wrapper {
+	width: calc(100% - 20px);
+}
+
+#content_area {
+	float: left;
+	width: 720px;
+}
+.tablet #content_area {
+	float: none;
+}
+.sp #content_area {
+	width: 100%;
+}
+#content_area img {
+	max-width: 100%;
+	height: auto;
+}
+
+/* SDGs detail imports retain the origin's image utility class, but WordPress
+   strips the inline display declaration when the record is saved. Restore the
+   exact origin behavior so centered article images remain centered. */
+.arkray-sdg-initiative-detail #editor_area img.mt-image-center {
+	display: block;
+	margin: 0 auto 20px;
+}
+
+/* Match the source header's native form-control line box. The parent theme's
+   reset otherwise makes the region selector and language row 10px shorter. */
+.arkray-sdg-initiative-detail .header_right .select select {
+	font-size: 13.3333px;
+}
+.arkray-sdg-initiative-detail .header_right ul.language {
+	min-height: 19.2px;
+}
+
+/* Page-specific rules embedded by the original promoting.html page. */
+.arkray-sdg-initiative--promoting #editor_area .centerbox {
+	width: 300px;
+	margin-left: auto;
+	margin-right: auto;
+	text-align: left;
+}
+.arkray-sdg-initiative--promoting #editor_area .indent1 {
+	text-indent: 1rem;
+}
+.arkray-sdg-initiative--promoting #editor_area .center-table {
+	margin-left: auto;
+	margin-right: auto;
+	border-collapse: collapse;
+}
+.arkray-sdg-initiative--promoting #editor_area .center-table th,
+.arkray-sdg-initiative--promoting #editor_area .center-table td {
+	text-align: left;
+}
+.arkray-sdg-initiative--promoting #editor_area .center-table th {
+	padding: 3px 10px;
+	border: 1px solid #fff;
+	background-color: #e6e6e6;
+	font-weight: bold;
+}
+.arkray-sdg-initiative--promoting #editor_area .center-table td {
+	padding: 3px 10px;
+	border: 1px solid #fff;
+	background-color: #f3f3f3;
+}
+.arkray-sdg-initiative--promoting #editor_area .arkray-promoting-certification-image {
+	text-align: center;
+}
+
+/* Page-specific rule embedded by Calculating_CO2_Emissions.html. */
+.arkray-sdg-initiative--calculating_co2_emissions #editor_area .example img {
+	width: 100%;
+	height: auto;
+	display: block;
+}
+
+/* Page-specific rules embedded by supplychain/post_32.html. */
+.arkray-sdg-initiative--post_32 #editor_area .dgy {
+	width: 290px;
+}
+@media screen and (max-width: 786px) {
+	.arkray-sdg-initiative--post_32 #editor_area .midasi {
+		background-color: #fff !important;
+	}
+	.arkray-sdg-initiative--post_32 #editor_area .dgy {
+		background-color: #c6c6c6 !important;
+	}
+	.arkray-sdg-initiative--post_32 #editor_area .fff {
+		background-color: #f2f2f2 !important;
+	}
+}
+
+/* Page-specific rules embedded by about/action_guidelines.html. */
+.arkray-sdg-initiative--developing-compliance-guidelines #editor_area .dgy {
+	width: 290px;
+}
+.arkray-sdg-initiative--developing-compliance-guidelines #editor_area .indent03 {
+	padding-left: 3.2em;
+	text-indent: -3.2em;
+}
+@media screen and (max-width: 786px) {
+	.arkray-sdg-initiative--developing-compliance-guidelines #editor_area .midasi {
+		background-color: #fff !important;
+	}
+	.arkray-sdg-initiative--developing-compliance-guidelines #editor_area .dgy {
+		background-color: #c6c6c6 !important;
+	}
+	.arkray-sdg-initiative--developing-compliance-guidelines #editor_area .fff {
+		background-color: #f2f2f2 !important;
+	}
+}
+
+/* Responsive columns embedded by news/2026/release20250114_jp_en.html. */
+.arkray-sdg-initiative--promoting-the-internal-initiatives-to-accommodate-sexual-minorities #editor_area .col_1 {
+	display: flex;
+	flex-wrap: wrap;
+	width: 100%;
+	margin-bottom: 10px;
+}
+.arkray-sdg-initiative--promoting-the-internal-initiatives-to-accommodate-sexual-minorities #editor_area .col_1 > .item1 {
+	width: 35%;
+	text-align: left;
+}
+.arkray-sdg-initiative--promoting-the-internal-initiatives-to-accommodate-sexual-minorities #editor_area .col_1 > .item2 {
+	width: 60%;
+	padding-left: 10px;
+}
+.arkray-sdg-initiative--promoting-the-internal-initiatives-to-accommodate-sexual-minorities #editor_area .col_2 {
+	display: flex;
+	flex-wrap: wrap;
+	width: 100%;
+	margin-bottom: 10px;
+	text-align: center;
+}
+.arkray-sdg-initiative--promoting-the-internal-initiatives-to-accommodate-sexual-minorities #editor_area .col_2 > div {
+	width: 50%;
+	padding-right: 0;
+	text-align: left;
+}
+.arkray-sdg-initiative--promoting-the-internal-initiatives-to-accommodate-sexual-minorities #editor_area .left2 {
+	margin-left: 16%;
+	font-size: 80%;
+	text-align: left;
+}
+.arkray-sdg-initiative--promoting-the-internal-initiatives-to-accommodate-sexual-minorities #editor_area .col_3 {
+	display: flex;
+	flex-wrap: wrap;
+	width: 100%;
+	margin-bottom: 10px;
+	text-align: center;
+}
+.arkray-sdg-initiative--promoting-the-internal-initiatives-to-accommodate-sexual-minorities #editor_area .col_3 > div {
+	width: 25%;
+	padding: 0;
+	text-align: center;
+}
+@media screen and (max-width: 960px) {
+	.arkray-sdg-initiative--promoting-the-internal-initiatives-to-accommodate-sexual-minorities #editor_area .col_1 > div img {
+		width: 80%;
+	}
+	.arkray-sdg-initiative--promoting-the-internal-initiatives-to-accommodate-sexual-minorities #editor_area .col_1 > .item1 {
+		width: 100%;
+		text-align: center;
+	}
+	.arkray-sdg-initiative--promoting-the-internal-initiatives-to-accommodate-sexual-minorities #editor_area .col_1 > .item2 {
+		width: 100%;
+		text-align: left;
+	}
+	.arkray-sdg-initiative--promoting-the-internal-initiatives-to-accommodate-sexual-minorities #editor_area .col_2 > div img {
+		text-align: center;
+	}
+	.arkray-sdg-initiative--promoting-the-internal-initiatives-to-accommodate-sexual-minorities #editor_area .col_2 > div {
+		width: 100%;
+		text-align: center;
+	}
+	.arkray-sdg-initiative--promoting-the-internal-initiatives-to-accommodate-sexual-minorities #editor_area .left2 {
+		margin-left: 36%;
+	}
+	.arkray-sdg-initiative--promoting-the-internal-initiatives-to-accommodate-sexual-minorities #editor_area .col_3 > div {
+		width: 100%;
+		text-align: center;
+	}
+}
+
+h1.h1_content {
+	font-size: 28px;
+	font-weight: normal;
+	color: #000;
+	letter-spacing: 1.5px;
+	padding: 0px 0 60px;
+	line-height: 1.3;
+}
+.sp h1.h1_content {
+	padding: 0px 0 20px;
+}
+
+h1.h1_about {
+	padding: 20px 0 20px 20px;
+	font-size: 28px;
+	font-weight: normal;
+	margin-bottom: 35px;
+	background: url(../img/h1_index_bg.jpg) repeat-y;
+}
+
+h1.h1_news {
+	padding: 20px 0 20px 20px;
+	font-size: 28px;
+	font-weight: normal;
+	margin-bottom: 35px;
+	background: url(../img/h1_index_bg.jpg) repeat-y;
+}
+
+h1.h1_event {
+	padding: 20px 0 20px 20px;
+	font-size: 28px;
+	font-weight: normal;
+	margin-bottom: 35px;
+	background: url(../img/h1_index_bg.jpg) repeat-y;
+}
+
+h1.h1_product {
+	padding: 20px 0 20px 20px;
+	font-size: 28px;
+	font-weight: normal;
+	margin-bottom: 35px;
+	background: url(../img/h1_index_bg.jpg) repeat-y;
+}
+
+h1.h1_index {
+	padding: 20px 0 20px 20px;
+	font-size: 28px;
+	font-weight: normal;
+	margin-bottom: 35px;
+	background: url(../img/h1_index_bg.jpg) repeat-y;
+}
+
+h2.h2_content {
+	font-size: 26px;
+	font-weight: normal;
+	color: #999;
+	letter-spacing: 1.5px;
+	border-bottom: 1px solid #828182;
+	margin-bottom: 15px;
+	line-height: 1.2;
+}
+
+h2.h2_content_nm {
+	font-size: 26px;
+	font-weight: normal;
+	color: #999;
+	letter-spacing: 1.5px;
+	border-bottom: 1px solid #828182;
+}
+
+h3.h3_content {
+	font-size: 18px;
+	font-weight: normal;
+	color: #999;
+	letter-spacing: 1.5px;
+	border-bottom: 1px solid #828182;
+	margin-bottom: 15px;
+}
+
+.indent01 {
+	margin-left: 2.2em;
+	text-indent: -2.2em;
+}
+
+.indent02 {
+	margin-left: 1.2em;
+	text-indent: -1.2em;
+}
+
+.product_lineup {
+	display: table;
+	width: 719px;
+	border-bottom: 1px solid #e6e6e6;
+}
+.sp .product_lineup {
+	display: block;
+	width: 100%;
+	border-bottom: none;
+}
+
+.product_lineup:last-of-type {
+	border-bottom: none;
+	margin-bottom: 20px;
+}
+
+.product_lineup .box {
+	display: table-cell;
+	width: 339px;
+	padding: 25px 0 25px 20px;
+	border-right: 1px solid #e6e6e6;
+}
+.sp .product_lineup .box {
+	display: block;
+	width: 100%;
+	padding: 25px 0 25px 0px;
+	border-right: none;
+	border-bottom: 1px solid #e6e6e6;
+}
+.sp .product_lineup .box.blank {
+	display: none;
+}
+
+.product_lineup .box h3 {
+	font-size: 22px;
+	font-weight: normal;
+	margin-bottom: 10px;
+}
+.sp .product_lineup .box h3 {
+	max-width: 290px;
+	margin: 0 auto 10px;
+}
+
+.product_lineup .box:last-child {
+	border-right: none;
+}
+
+.lineup_list {
+	display: table;
+}
+.sp .lineup_list {
+	max-width: 290px;
+	margin: 0 auto;
+}
+
+.lineup_list .list {
+	display: table-cell;
+	width: 199px;
+}
+
+.lineup_list .list h4 {
+	font-weight: normal;
+	font-size: 12px;
+}
+.sp .lineup_list .list h4 {
+	font-size: 16px;
+}
+
+.lineup_list .list ul {
+	padding-left: 15px;
+	font-size: 12px;
+}
+.sp .lineup_list .list ul {
+	font-size: 15px;
+	padding-left: 5px;
+	padding-top: 5px;
+}
+
+.lineup_list .list ul li {
+	padding-left: 7px;
+	background: url(../img/dot01_ac.jpg) no-repeat 0 7px;
+}
+.sp .lineup_list .list ul li {
+	margin-bottom: 10px;
+	background: url(../img/dot01_ac.jpg) no-repeat 0 10px;
+}
+
+.lineup_list .img {
+	display: table-cell;
+	width: 120px;
+	padding-right: 20px;
+	vertical-align: top;
+}
+/* WP-context constraint: original arkray.co.jp pre-sized lineup images to
+   130-140px wide (filenames like _w140, _130). WordPress media pipeline can
+   serve full-res images, so we cap to the original's asset spec.
+   Source: original image filenames _140 / _130 + .lineup_list .img width:120px
+   content-css:275-280. */
+.lineup_list .img img {
+	max-width: 140px;
+	max-height: 120px;
+	width: auto;
+	height: auto;
+}
+.sp .lineup_list .img {
+	width: 80px;
+	padding-right: 0;
+}
+.sp .lineup_list .img img {
+	width: 100%;
+	height: auto;
+}
+
+#content_product {
+	width: 720px;
+	padding-bottom: 50px;
+}
+.sp #content_product {
+	width: 100%;
+}
+
+#content_product_left {
+	float: left;
+	width: 480px;
+	padding-right: 50px;
+}
+.sp #content_product_left {
+	float: none;
+	width: 100%;
+	padding-right: 0px;
+	margin-top: 20px;
+}
+
+#content_product_right {
+	float: right;
+	width: 163px;
+}
+.sp #content_product_right {
+	float: none;
+	width: 100%;
+	text-align: center;
+}
+
+ul.ul_dot01 {
+	padding-left: 15px;
+}
+
+ul.ul_dot01 li {
+	padding-left: 7px;
+	margin-bottom: 5px;
+	background: url(../img/dot01_ac.jpg) no-repeat 0 9px;
+}
+
+table.table_common {
+	width: 100%;
+	border-collapse: collapse;
+}
+.sp table.table_common {
+	display: block;
+}
+.sp table.table_common tbody {
+	display: block;
+	width: 100%;
+}
+.sp table.table_common tr {
+	display: block;
+}
+table.table_common th {
+	width: 130px;
+	padding: 3px 10px;
+	border: solid 1px #fff;
+	background-color: #e6e6e6;
+	font-weight: bold;
+	text-align: left;
+}
+.sp table.table_common th {
+	display: block;
+	width: calc(100% - 20px) !important;
+}
+table.table_common td {
+	padding: 3px 10px;
+	border: 1px solid #fff;
+	background-color: #f3f3f3;
+}
+.sp table.table_common td {
+	display: block;
+	width: calc(100% - 20px) !important;
+}
+
+p.product_item {
+	margin-bottom: 10px;
+}
+
+p.product_item a {
+	display: inline-block;
+	padding: 2px 50px 2px 5px;
+	min-width: 160px;
+	color: #fff;
+}
+
+p.product_item a[href$=".pdf"] {
+	background: url(../img/ico_pdf.jpg) no-repeat 97% #828182;
+}
+
+p.product_item a[href$=".zip"] {
+	background: url(../img/ico_zip.jpg) no-repeat 97% #828182;
+}
+
+p.product_item a[href$=".doc"], p.product_item a[href$=".docx"] {
+	background: url(../img/ico_doc.jpg) no-repeat 97% #828182;
+}
+
+p.product_item a[href$=".xls"], p.product_item a[href$=".xlsx"] {
+	background: url(../img/ico_xls.jpg) no-repeat 97% #828182;
+}
+
+p.product_item a:hover {
+	text-decoration: none;
+	background-color: #ccc;
+}
+
+a.zip {
+	display: inline-block;
+	padding: 2px 50px 2px 5px;
+	background: url(../img/ico_zip.jpg) no-repeat 97% #828182;
+	min-width: 150px;
+	color: #fff;
+}
+
+a.zip:hover {
+	text-decoration: none;
+	background-color: #ccc;
+}
+
+.content_newsarea {
+	width: 720px;
+}
+.sp .content_newsarea {
+	width: 100%;
+}
+
+.content_newsarea div.box {
+	width: 720px;
+	padding: 10px 0;
+	border-bottom: 1px solid #969696;
+}
+.sp .content_newsarea div.box {
+	width: 100%;
+}
+
+.content_newsarea div.box p {
+	display: table-cell;
+	vertical-align: middle;
+}
+.sp .content_newsarea div.box p {
+	display: block;
+}
+
+.content_newsarea div.box p.tag {
+	width: 60px;
+	font-size: 10px;
+	color: #999;
+}
+.sp .content_newsarea div.box p.tag {
+	float: left;
+	width: auto;
+}
+
+.content_newsarea div.box p.tag span {
+	display: block;
+	width: 42px;
+	padding: 1px 3px 0 3px;
+	text-align: center;
+	border: 1px solid #999;
+}
+.sp .content_newsarea div.box p.tag span {
+	float: left;
+}
+
+.content_newsarea div.box p.tag span.new {
+	display: block;
+	border: none;
+	width: 44px;
+	padding: 1px 3px 0 3px;
+	text-align: center;
+	background: #e6e6e6;
+}
+.sp .content_newsarea div.box p.tag span.new {
+	float: left;
+}
+
+.content_newsarea div.box p.date {
+	width: 120px;
+}
+.sp .content_newsarea div.box p.date {
+	float: left;
+	padding-left: 15px;
+}
+
+.content_newsarea div.box p.tx {
+	width: 405px;
+	padding-right: 5px;
+}
+.sp .content_newsarea div.box p.tx {
+	width: 100%;
+	padding: 10px 0 0 0;
+	margin-bottom: 0;
+	clear: both;
+}
+
+.content_newsarea div.box p.tx_long {
+	width: 540px;
+}
+.sp .content_newsarea div.box p.tx_long {
+	width: 100%;
+	padding: 10px 0 0 0;
+	margin-bottom: 0;
+	clear: both;
+}
+
+.content_newsarea div.box p.img {
+	width: 130px;
+	text-align: center;
+}
+.sp .content_newsarea div.box p.img {
+	display: none;
+}
+
+.content_eventarea {
+	width: 720px;
+}
+.sp .content_eventarea {
+	width: 100%;
+}
+
+.content_eventarea div.box {
+	width: 720px;
+	padding: 10px 0;
+	border-bottom: 1px solid #969696;
+}
+.sp .content_eventarea div.box {
+	width: 100%;
+}
+
+.content_eventarea div.box p {
+	display: table-cell;
+	vertical-align: middle;
+}
+.sp .content_eventarea div.box p {
+	display: block;
+}
+
+.content_eventarea div.box p.tag {
+	width: 60px;
+	font-size: 10px;
+	color: #999;
+}
+.sp .content_eventarea div.box p.tag {
+	float: left;
+	width: auto;
+}
+
+.content_eventarea div.box p.tag span {
+	display: block;
+	width: 42px;
+	padding: 1px 3px 0 3px;
+	text-align: center;
+	border: 1px solid #999;
+}
+.sp .content_eventarea div.box p.tag span {
+	float: left;
+}
+
+.content_eventarea div.box p.tag span.new {
+	display: block;
+	border: none;
+	width: 44px;
+	padding: 1px 3px 0 3px;
+	text-align: center;
+	background: #e6e6e6;
+}
+.sp .content_eventarea div.box p.tag span.new {
+	float: left;
+}
+
+.content_eventarea div.box p.date {
+	width: 140px;
+}
+.sp .content_eventarea div.box p.date {
+	float: left;
+	padding-left: 15px;
+}
+
+.content_eventarea div.box p.tx_long {
+	width: 520px;
+}
+.sp .content_eventarea div.box p.tx_long {
+	width: 100%;
+	padding: 10px 0 0 0;
+	margin-bottom: 0;
+	clear: both;
+}
+
+.content_eventarea div.box.usasize p.tag {
+	width: 100px;
+}
+.sp .content_eventarea div.box.usasize p.tag {
+	width: auto;
+}
+.content_eventarea div.box.usasize p.tag span {
+	width: 82px;
+}
+.content_eventarea div.box.usasize p.date {
+	width: 100px;
+}
+.content_eventarea div.box.usasize p.tx_long {
+	width: 520px;
+}
+.sp .content_eventarea div.box.usasize p.tx_long {
+	width: auto;
+}
+
+.product_index_line {
+	display: table;
+}
+.sp .product_index_line {
+	display: block;
+	width: 100%;
+}
+
+.product_index_line div {
+	display: table-cell;
+	vertical-align: top;
+	width: 230px;
+	padding: 14px 0 5px 14px;
+	border-left: 1px solid #e6e6e6;
+}
+.sp .product_index_line div {
+	display: block;
+	width: 300px;
+	padding: 14px 0px 5px 0px;
+	margin: 0 auto;
+	border-left: none;
+}
+
+.product_index_line div:first-child {
+	padding-left: 0px;
+	border-left: none;
+}
+
+.product_index_line div p.tx {
+	display: table-cell;
+	vertical-align: top;
+	width: 155px;
+	padding: 0 5px 5px 0;
+}
+.sp .product_index_line div p.tx {
+	width: 235px;
+	font-size: 15px;
+}
+
+.product_index_line div p.img {
+	display: table-cell;
+	vertical-align: top;
+	width: 60px;
+	padding: 0px 10px 5px 0;
+}
+.sp .product_index_line div p.img {
+	padding: 0px 0px 5px 0;
+}
+
+.contact_area {
+	padding-top: 50px;
+}
+
+.contact_area p {
+	padding: 16px 0 15px 0;
+	text-align: center;
+	background: #e6e6e6;
+}
+
+.contact_area a {
+	display: inline-block;
+	padding: 3px 15px;
+	color: #fff !important;
+	font-size: 14px;
+	background: #828182;
+}
+
+.contact_area a:hover {
+	background: #ccc;
+	text-decoration: none;
+}
+
+/* Event detail register-button variants (from original event pages). */
+.contact_area2 {
+	padding-top: 3px;
+}
+
+.contact_area2 p {
+	padding: 0;
+	text-align: left;
+	background: #ffffff;
+}
+
+.contact_area2 a {
+	display: inline-block;
+	padding: 2px 6px;
+	color: #fff !important;
+	font-size: 13px;
+	background: #828182;
+}
+
+.contact_area2 a:hover {
+	background: #ccc;
+	text-decoration: none;
+}
+
+.contact_area3 {
+	margin-bottom: 10px;
+}
+
+.contact_area3 p {
+	padding: 0;
+	text-align: center;
+	background: #ffffff;
+}
+
+.contact_area3 a {
+	display: inline-block;
+	padding: 2px 6px;
+	color: #fff !important;
+	font-size: 13px;
+	background: #828182;
+}
+
+.contact_area3 a:hover {
+	background: #ccc;
+	text-decoration: none;
+}
+
+.concept_logo {
+	padding-top: 40px;
+	padding-bottom: 70px;
+	margin-bottom: 20px;
+	text-align: center;
+	border-bottom: 1px solid #e6e6e6;
+}
+
+.common_tabarea {
+	border-bottom: 1px solid #828182;
+}
+
+.common_tab {
+	display: table;
+	position: relative;
+	top: 1px;
+}
+
+.common_tab p {
+	display: table-cell;
+	background: #e6e6e6;
+}
+
+.common_tab a {
+	display: block;
+	padding: 5px 10px;
+	border-top: 1px solid #828182;
+	border-right: 1px solid #828182;
+	border-bottom: 1px solid #828182;
+	color: #333;
+}
+.sp .common_tab a {
+	padding: 5px 5px;
+}
+
+.common_tab p:first-child a {
+	border-left: 1px solid #828182;
+}
+
+.common_tab a.ac, .common_tab a:hover {
+	background: #fff;
+	color: #000;
+	text-decoration: none;
+	border-bottom: 1px solid #fff;
+	z-index: 10;
+}
+
+.history_column_area {
+	width: 720px;
+	padding-top: 20px;
+	padding-bottom: 20px;
+}
+.sp .history_column_area {
+	width: 300px;
+	margin: 0 auto;
+}
+
+.history_column_area .column {
+	float: left;
+	width: 319px;
+	padding: 0 20px;
+}
+.sp .history_column_area .column {
+	float: none;
+	width: 300px;
+	padding: 0 0px;
+}
+
+.history_column_area .column:first-child {
+	width: 339px;
+	padding-left: 0px;
+	border-right: 1px solid #e6e6e6;
+}
+.sp .history_column_area .column:first-child {
+	width: 300px;
+	border-right: none;
+	padding-bottom: 20px;
+}
+
+#editor_area .history_column_area .column h2 {
+	font-size: 18px;
+	font-weight: normal;
+	color: #999;
+	letter-spacing: 1.5px;
+	border-bottom: 1px solid #828182;
+	margin-bottom: 15px;
+}
+
+#editor_area .history_column_area .column img {
+	padding: 8px 0px;
+}
+
+.history_column_area .column dt {
+	font-weight: bold;
+}
+
+.history_column_area .column dd {
+	padding-bottom: 10px;
+	margin-bottom: 10px;
+	border-bottom: 1px solid #e6e6e6;
+}
+
+.group_box {
+	padding-bottom: 0px;
+	margin-bottom: 15px;
+	border-bottom: 1px solid #e6e6e6;
+}
+
+.group_box form {
+	margin-bottom: 15px;
+}
+
+.group_box .title {
+	font-weight: bold;
+}
+
+a.link_tx {
+	display: inline-block;
+	background: #828182;
+	padding: 3px 10px;
+	color: #fff;
+}
+
+a.link_tx:hover {
+	background: #ccc;
+	text-decoration: none;
+}
+
+.about_index {
+	width: 720px;
+	padding-bottom: 30px;
+}
+.sp .about_index {
+	width: 100%;
+	padding-bottom: 0px;
+}
+
+.about_index .column {
+	float: left;
+	width: 350px;
+}
+.sp .about_index .column {
+	float: none;
+	width: auto;
+	max-width: 350px;
+	margin: 0 auto 20px;
+}
+
+.about_index .column:first-child {
+	padding-right: 20px;
+}
+.sp .about_index .column:first-child {
+	padding-right: 0;
+}
+
+#editor_area .about_index .column h2 {
+	font-size: 22px;
+	font-weight: normal;
+	color: #000;
+	letter-spacing: 1.5px;
+	margin-bottom: 10px;
+	border-bottom: none;
+}
+.sp #editor_area .about_index .column h2 {
+	text-align: center;
+}
+
+.catalog_area {
+	padding-top: 20px;
+}
+
+.sp .catalog_area p {
+	text-align: center;
+}
+
+.catalog_area a {
+	padding: 3px 45px 3px 15px;
+	color: #fff;
+	font-size: 14px;
+	background: #828182;
+	background: url(../img/ico_pdf.jpg) no-repeat 97% #828182;
+}
+
+.catalog_area a:hover {
+	background-color: #ccc;
+	text-decoration: none;
+}
+
+.center_2img {
+	text-align: center;
+}
+
+.center_2img p {
+	display: inline-block;
+	text-align: left;
+	margin-right: 20px;
+}
+
+.center_2img p.poc_left {
+	width: 150px;
+	vertical-align: top;
+	padding-left: 50px;
+	margin-right: 100px;
+}
+
+.center_2img p.poc_right {
+	width: 200px;
+	vertical-align: top;
+}
+
+.gallery_pickup {
+	margin-bottom: 50px;
+}
+
+.gallery_pickup div.title {
+	display: table;
+	margin-bottom: 20px;
+}
+
+.gallery_pickup div.title p {
+	display: table-cell;
+	vertical-align: middle;
+}
+
+.gallery_pickup div.title p span {
+	font-size: 10px;
+	padding: 1px 5px;
+	background: #e6e6e6;
+}
+
+.gallery_pickup div.title h2 {
+	display: table-cell;
+	font-weight: normal;
+	font-size: 26px;
+	line-height: 1.2;
+}
+
+.gallery_pickup div.tx p {
+	margin-top: 20px;
+}
+
+.gallery_pickup .gallery_left {
+	float: left;
+	width: 370px;
+	padding-right: 30px;
+}
+
+.gallery_pickup .gallery_right {
+	float: left;
+	width: 320px;
+}
+
+.gellery_lineup {
+	display: table;
+	width: 719px;
+	border-bottom: 1px solid #e6e6e6;
+}
+.sp .gellery_lineup {
+	display: block;
+	width: 100%;
+	border-bottom: none;
+}
+
+.gellery_lineup:last-of-type {
+	border-bottom: none;
+	margin-bottom: 20px;
+}
+
+.gellery_lineup .box {
+	display: table-cell;
+	width: 319px;
+	padding: 25px 20px 25px 20px;
+	border-right: 1px solid #e6e6e6;
+	vertical-align: top;
+}
+.sp .gellery_lineup .box {
+	display: block;
+	width: 100%;
+	padding: 0;
+	border-right: none;
+	margin-top: 20px;
+}
+
+.gellery_lineup .box:last-child {
+	border-right: none;
+}
+
+.gellery_lineup .box .tx {
+	float: left;
+	width: 179px;
+	padding-right: 20px;
+}
+.sp .gellery_lineup .box .tx {
+	width: calc(100% - 130px);
+	padding-right: 10px;
+}
+
+.gellery_lineup .box .tx h3 {
+	font-size: 16px;
+	font-weight: normal;
+	margin-bottom: 5px;
+	line-height: 1.2;
+}
+
+.gellery_lineup .box .img {
+	float: left;
+	width: 120px;
+}
+
+.gellery_lineup .box h3 {
+	font-size: 26px;
+	font-weight: normal;
+	margin-bottom: 10px;
+}
+
+.sitemap_area {
+	margin-bottom: 30px;
+}
+
+.sitemap_left {
+	float: left;
+	width: 260px;
+}
+.sp .sitemap_left {
+	float: none;
+	width: 100%;
+}
+
+.sitemap_right {
+	float: left;
+	width: 450px;
+	padding-left: 10px;
+}
+.sp .sitemap_right {
+	float: none;
+	width: 100%;
+	padding-left: 0;
+}
+
+#editor_area .sitemap_left h2 {
+	display: inline-block;
+	padding-right: 5px;
+	font-size: 26px;
+	font-weight: normal;
+	color: #333;
+	letter-spacing: 1.5px;
+	line-height: 1.2;
+	background: #fff;
+	border-bottom: none;
+	margin-bottom: 0px;
+}
+
+#editor_area .sitemap_left .line {
+	background: url(../img/gray_line.jpg) left 50% repeat-x;
+}
+
+.sitemap_right ul {
+	padding-top: 5px;
+}
+
+.sitemap_right ul li {
+	display: inline-block;
+	padding-left: 7px;
+	margin-bottom: 5px;
+	margin-right: 13px;
+	background: url(../img/dot01_ac.jpg) no-repeat 0 9px;
+}
+
+.outline_box:after {
+	content: "";
+	clear: both;
+	display: block;
+}
+.outline_box > div {
+	float: left;
+	position: relative;
+	width: 28%;
+	height: 350px;
+	border: 1px solid #999;
+	padding: 10px;
+}
+.sp .outline_box > div {
+	width: calc(100% - 22px);
+	height: auto;
+	margin-bottom: 20px;
+}
+.outline_box > div:not(:first-child) {
+	margin-left: 2%;
+}
+.sp .outline_box > div:not(:first-child) {
+	margin-left: 0;
+}
+.outline_box > div .img {
+	position: absolute;
+	bottom: 10px;
+	text-align: center;
+}
+.sp .outline_box > div .img {
+	position: static;
+}
+.outline_box.russia > div {
+	height: 440px;
+}
+
+.outline_mini_box > div {
+	float: left;
+	width: 350px;
+}
+.sp .outline_mini_box > div {
+	width: 100%;
+}
+.outline_mini_box > div:nth-of-type(2n) {
+	margin-left: 20px;
+}
+.sp .outline_mini_box > div:nth-of-type(2n) {
+	margin-left: 0;
+}
+.sp .outline_mini_box > div .colR {
+	width: calc(100% - 75px) !important;
+}
+
+.youtube {
+	position: relative;
+	padding-bottom: 56.25%;
+	height: 0;
+	overflow: hidden;
+}
+.youtube iframe {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+}
+
+#editor_area h2 {
+	font-size: 26px;
+	font-weight: normal;
+	color: #999;
+	letter-spacing: 1.5px;
+	margin-bottom: 25px;
+	line-height: 1.2;
+}
+
+.news_area h2 {
+	border-bottom: 1px solid #828182;
+}
+
+#editor_area h2.h2_news {
+	color: #000;
+}
+
+#editor_area h3 {
+	font-size: 18px;
+	font-weight: normal;
+	color: #999;
+	letter-spacing: 1.5px;
+	border-bottom: 1px solid #828182;
+	margin-bottom: 15px;
+}
+
+#editor_area p {
+	margin-bottom: 15px;
+	font-size: 12px;
+	line-height: 1.6;
+}
+#editor_area strong, #editor_area b {
+	font-weight: bolder;
+}
+#editor_area ul li, #editor_area ol li {
+	font-size: 12px;
+}
+
+#editor_area p.txb {
+	margin-bottom: 40px;
+}
+
+#editor_area .group_box .title {
+	margin-bottom: 5px;
+}
+
+#editor_area a.button {
+	display: inline-block;
+	background: #828182;
+	padding: 3px 10px;
+	color: #fff;
+}
+
+#editor_area a.button:hover {
+	background: #ccc;
+	text-decoration: none;
+}
+
+#editor_area ul {
+	padding-left: 15px;
+	margin-bottom: 15px;
+}
+.sp #editor_area ul {
+	padding-left: 5px;
+	font-size: 15px;
+}
+
+#editor_area ul li {
+	padding-left: 7px;
+	margin-bottom: 5px;
+	background: url(../img/dot01_ac.jpg) no-repeat 0 9px;
+}
+
+#editor_area table {
+	width: 100%;
+	border-collapse: collapse;
+}
+#editor_area table th {
+	padding: 3px 10px;
+	border: solid 1px #fff;
+	background-color: #e6e6e6;
+	font-weight: bold;
+	text-align: left;
+}
+#editor_area table td {
+	padding: 3px 10px;
+	border: 1px solid #fff;
+	background-color: #f3f3f3;
+}
+
+.sp #editor_area table:not(.scroll).tbl01, .sp #editor_area table:not(.scroll).border, .sp #editor_area table:not(.scroll).typeB {
+	display: block;
+	width: 100%;
+}
+.sp #editor_area table:not(.scroll).tbl01 tbody, .sp #editor_area table:not(.scroll).border tbody, .sp #editor_area table:not(.scroll).typeB tbody {
+	display: block;
+	width: 100%;
+}
+.sp #editor_area table:not(.scroll).tbl01 tr, .sp #editor_area table:not(.scroll).border tr, .sp #editor_area table:not(.scroll).typeB tr {
+	display: block;
+}
+.sp #editor_area table:not(.scroll).tbl01 th, .sp #editor_area table:not(.scroll).border th, .sp #editor_area table:not(.scroll).typeB th {
+	display: block;
+	width: calc(100% - 20px) !important;
+}
+.sp #editor_area table:not(.scroll).tbl01 td, .sp #editor_area table:not(.scroll).border td, .sp #editor_area table:not(.scroll).typeB td {
+	display: block;
+	width: calc(100% - 20px) !important;
+}
+
+.sp div.scroll {
+	width: 100%;
+	overflow-y: hidden;
+	overflow-x: auto;
+	-ms-overflow-style: -ms-autohiding-scrollbar;
+	-webkit-overflow-scrolling: touch;
+}
+.sp div.scroll table {
+	border-collapse: collapse;
+}
+.sp div.scroll table th, .sp div.scroll table td {
+	white-space: nowrap;
+}
+.sp div.scroll::-webkit-scrollbar {
+	height: 8px;
+}
+.sp div.scroll::-webkit-scrollbar-thumb {
+	background: #aaa;
+}
+.sp div.scroll::-webkit-scrollbar-track {
+	background: #ccc;
+}
+
+#editor_area .press_box {
+	padding: 10px;
+	margin-bottom: 15px;
+	border: 1px solid #828182;
+}
+
+#editor_area .g13boldblue, #editor_area .red, #editor_area .blue, #editor_area .style3 {
+	font-weight: bold;
+}
+
+#editor_area .colL {
+	float: left;
+}
+.sp #editor_area .colL {
+	float: none;
+	width: auto !important;
+}
+
+#editor_area .colR {
+	float: left;
+}
+.sp #editor_area .colR {
+	float: none;
+	width: auto !important;
+}
+
+#editor_area .txtIn {
+	margin-left: 1.8em;
+	text-indent: -1.8em;
+}
+
+#editor_area .txtIn2 {
+	margin-left: 1em;
+	text-indent: -1em;
+}
+
+#editor_area .mb0 {
+	margin-bottom: 0;
+}
+
+#editor_area div#gmap {
+	width: 720px;
+	height: 350px;
+}
+.tablet #editor_area div#gmap {
+	position: relative;
+	width: 100%;
+	height: auto;
+}
+.tablet #editor_area div#gmap:before {
+	content: "";
+	display: block;
+	padding-top: 56.25%;
+}
+.tablet #editor_area div#gmap > div {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+}
+
+#editor_area div#gmap a {
+	text-decoration: underline;
+}
+
+#editor_area div#gmap a:hover {
+	text-decoration: none;
+}
+
+#editor_area ul.gmap_tab {
+	margin-top: 20px;
+	padding-left: 0px;
+	margin-bottom: 15px;
+}
+
+#editor_area ul.gmap_tab li {
+	display: inline-block;
+	padding: 5px 20px;
+	cursor: pointer;
+	color: #fff;
+	font-size: 12px;
+	height: 38px;
+	vertical-align: top;
+}
+
+#editor_area ul.gmap_tab li.btn01 {
+	background: #888;
+	line-height: 38px;
+}
+
+#editor_area ul.gmap_tab li.btn02 {
+	background: #fa7b89;
+}
+
+#editor_area ul.gmap_tab li.btn03 {
+	background: #ecc471;
+}
+
+#editor_area ul.gmap_tab li.btn04 {
+	background: #48d67a;
+}
+
+#editor_area ul.gmap_tab li.btn05 {
+	background: #75aef3;
+}
+
+#editor_area ul.gmap_tab li.btn01:hover, #editor_area ul.gmap_tab li.btn01.ac {
+	background: #444;
+}
+
+#editor_area ul.gmap_tab li.btn02:hover, #editor_area ul.gmap_tab li.btn02.ac {
+	background: #ea5b69;
+}
+
+#editor_area ul.gmap_tab li.btn03:hover, #editor_area ul.gmap_tab li.btn03.ac {
+	background: #ecb461;
+}
+
+#editor_area ul.gmap_tab li.btn04:hover, #editor_area ul.gmap_tab li.btn04.ac {
+	background: #28b65a;
+}
+
+#editor_area ul.gmap_tab li.btn05:hover, #editor_area ul.gmap_tab li.btn05.ac {
+	background: #558ed3;
+}
+
+#editor_area p.gmap_lead {
+	margin: 10px 0 0;
+}
+.sp #editor_area p.gmap_lead + .common_tabarea .common_tab {
+	display: block;
+}
+.sp #editor_area p.gmap_lead + .common_tabarea .common_tab p {
+	display: inline-block;
+}
+.sp #editor_area p.gmap_lead + .common_tabarea .common_tab p a {
+	display: block;
+	padding: 5px 10px;
+	border: 1px solid #828182;
+	color: #333;
+}
+.sp #editor_area p.gmap_lead + .common_tabarea .common_tab p a.ac, .sp #editor_area p.gmap_lead + .common_tabarea .common_tab p a:hover {
+	background: #fff;
+	color: #000;
+	text-decoration: none;
+	border: 1px solid #828182;
+	z-index: 10;
+}
+
+#gdpr_content01, #gdpr_content02 {
+	display: none;
+	position: fixed;
+	width: 100%;
+	bottom: 0;
+	background: #fff;
+	border-top: 1px solid #666;
+}
+#gdpr_content01 > div, #gdpr_content02 > div {
+	padding: 30px;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+}
+.sp #gdpr_content01 > div, .sp #gdpr_content02 > div {
+	padding: 20px 10px;
+	display: block;
+}
+#gdpr_content01 > div .left, #gdpr_content02 > div .left {
+	width: calc(100% - 300px);
+}
+.sp #gdpr_content01 > div .left, .sp #gdpr_content02 > div .left {
+	width: auto;
+	padding-right: 20px;
+}
+#gdpr_content01 > div .left ul, #gdpr_content02 > div .left ul {
+	margin-top: 15px;
+}
+#gdpr_content01 > div .left ul label, #gdpr_content02 > div .left ul label {
+	cursor: pointer;
+}
+#gdpr_content01 > div .right, #gdpr_content02 > div .right {
+	width: 300px;
+	text-align: center;
+}
+.sp #gdpr_content01 > div .right, .sp #gdpr_content02 > div .right {
+	width: auto;
+	margin-top: 20px;
+}
+#gdpr_content01 > div .right .button, #gdpr_content02 > div .right .button {
+	text-align: center;
+}
+#gdpr_content01 > div .right .button > a, #gdpr_content02 > div .right .button > a {
+	display: inline-block;
+	background: #828182;
+	color: #fff;
+	padding: 5px 15px;
+	min-width: 100px;
+}
+#gdpr_content01 > div .right .button > a:hover, #gdpr_content02 > div .right .button > a:hover {
+	opacity: 0.7;
+	text-decoration: none;
+}
+#gdpr_content01 > div .right .button + .button, #gdpr_content02 > div .right .button + .button {
+	margin-top: 15px;
+}
+#gdpr_content01 .close, #gdpr_content02 .close {
+	position: absolute;
+	right: 20px;
+	top: 20px;
+	width: 20px;
+	height: 20px;
+	cursor: pointer;
+}
+.sp #gdpr_content01 .close, .sp #gdpr_content02 .close {
+	right: 5px;
+	top: 10px;
+}
+#gdpr_content01 .close:hover, #gdpr_content02 .close:hover {
+	opacity: 0.7;
+}
+#gdpr_content01 .close::before, #gdpr_content02 .close::before {
+	position: absolute;
+	content: "";
+	top: 1px;
+	left: 9px;
+	width: 2px;
+	height: 20px;
+	background: #666;
+	transform: rotate(45deg);
+}
+#gdpr_content01 .close::after, #gdpr_content02 .close::after {
+	position: absolute;
+	content: "";
+	top: 1px;
+	left: 9px;
+	width: 2px;
+	height: 20px;
+	background: #666;
+	transform: rotate(-45deg);
+}
+
+.sustainability_column {
+	display: flex;
+	justify-content: center;
+	flex-wrap: wrap;
+}
+.sustainability_column > div {
+	width: 33.33%;
+}
+.sustainability_column > div a {
+	display: block;
+}
+.sustainability_column > div img {
+	max-width: 100%;
+}
+.sustainability_column > div p {
+	text-align: center;
+	font-weight: bold;
+	font-size: 1.3rem;
+}
+
+#editor_area .sustainability_table {
+	overflow-x: auto;
+}
+#editor_area .sustainability_table table thead th {
+	text-align: center;
+	white-space: nowrap;
+	font-weight: normal;
+	border: 1px solid #000;
+}
+#editor_area .sustainability_table table tbody th, #editor_area .sustainability_table table tbody td {
+	vertical-align: top;
+	padding: 10px;
+	border: 1px solid #000;
+	background: #fff;
+}
+.sp #editor_area .sustainability_table table tbody th, .sp #editor_area .sustainability_table table tbody td {
+	min-width: 170px;
+}
+#editor_area .sustainability_table table tbody th {
+	font-size: 1.4rem;
+	text-align: center;
+}
+#editor_area .sustainability_table table tbody th .sdgs {
+	display: flex;
+	justify-content: center;
+	margin: 10px 0 0 -5px;
+}
+#editor_area .sustainability_table table tbody th .sdgs > * {
+	width: 70px;
+	margin-left: 5px;
+}
+.sp #editor_area .sustainability_table table tbody th .sdgs > * {
+	width: 50px;
+}
+#editor_area .sustainability_table table tbody ol li {
+	margin-left: 1.4rem;
+	text-indent: -1.4rem;
+}
+.sp #editor_area .sustainability_table table {
+	display: table;
+}
+.sp #editor_area .sustainability_table table thead {
+	display: table-header-group;
+}
+.sp #editor_area .sustainability_table table tbody {
+	display: table-row-group;
+}
+.sp #editor_area .sustainability_table table tr {
+	display: table-row;
+}
+.sp #editor_area .sustainability_table table th, .sp #editor_area .sustainability_table table td {
+	display: table-cell;
+}
+
+.Austria {
+	display: inline-block;
+	min-width: 92px;
+	background: url(../img/flag/Austria.png) right 2px no-repeat;
+	padding-right: 23px;
+}
+
+.Korea {
+	display: inline-block;
+	min-width: 92px;
+	background: url(../img/flag/Korea.png) right 2px no-repeat;
+	padding-right: 23px;
+}
+
+.Spain {
+	display: inline-block;
+	min-width: 92px;
+	background: url(../img/flag/Spain.png) right 2px no-repeat;
+	padding-right: 23px;
+}
+
+.USA {
+	display: inline-block;
+	min-width: 92px;
+	background: url(../img/flag/USA.png) right 2px no-repeat;
+	padding-right: 23px;
+}
+
+.BruneiDarussalam {
+	display: inline-block;
+	min-width: 92px;
+	background: url(../img/flag/BruneiDarussalam.png) right 2px no-repeat;
+	padding-right: 23px;
+}
+
+.Cambodia {
+	display: inline-block;
+	min-width: 92px;
+	background: url(../img/flag/Cambodia.png) right 2px no-repeat;
+	padding-right: 23px;
+}
+
+.DemocraticPeoplesRepublicofKorea {
+	display: inline-block;
+	min-width: 92px;
+	background: url(../img/flag/DemocraticPeoplesRepublicofKorea.png) right 2px no-repeat;
+	padding-right: 23px;
+}
+
+.LaoPeoplesDemocraticRepublic {
+	display: inline-block;
+	min-width: 92px;
+	background: url(../img/flag/LaoPeoplesDemocratic.png) right 2px no-repeat;
+	padding-right: 23px;
+}
+
+.Malaysia {
+	display: inline-block;
+	min-width: 92px;
+	background: url(../img/flag/Malaysia.png) right 2px no-repeat;
+	padding-right: 23px;
+}
+
+.Mongolia {
+	display: inline-block;
+	min-width: 92px;
+	background: url(../img/flag/Mongolia.png) right 2px no-repeat;
+	padding-right: 23px;
+}
+
+.Myanmar {
+	display: inline-block;
+	min-width: 92px;
+	background: url(../img/flag/Myanmar.png) right 2px no-repeat;
+	padding-right: 23px;
+}
+
+.Singapore {
+	display: inline-block;
+	min-width: 92px;
+	background: url(../img/flag/Singapore.png) right 2px no-repeat;
+	padding-right: 23px;
+}
+
+.Thailand {
+	display: inline-block;
+	min-width: 92px;
+	background: url(../img/flag/Thailand.png) right 2px no-repeat;
+	padding-right: 23px;
+}
+
+.Timor-Leste {
+	display: inline-block;
+	min-width: 92px;
+	background: url(../img/flag/Timor-Leste.png) right 2px no-repeat;
+	padding-right: 23px;
+}
+
+.VietNam {
+	display: inline-block;
+	min-width: 92px;
+	background: url(../img/flag/VietNam.png) right 2px no-repeat;
+	padding-right: 23px;
+}
+
+.Indonesia {
+	display: inline-block;
+	min-width: 92px;
+	background: url(../img/flag/Indonesia.png) right 2px no-repeat;
+	padding-right: 23px;
+}
+
+.Philippines {
+	display: inline-block;
+	min-width: 92px;
+	background: url(../img/flag/Philippines.png) right 2px no-repeat;
+	padding-right: 23px;
+}
+
+.Poland {
+	display: inline-block;
+	min-width: 92px;
+	background: url(../img/flag/Poland.png) right 2px no-repeat;
+	padding-right: 23px;
+}
+
+.Albania {
+	display: inline-block;
+	min-width: 92px;
+	background: url(../img/flag/Albania.png) right 2px no-repeat;
+	padding-right: 23px;
+}
+
+.Andorra {
+	display: inline-block;
+	min-width: 92px;
+	background: url(../img/flag/Andorra.png) right 2px no-repeat;
+	padding-right: 23px;
+}
+
+.Belarus {
+	display: inline-block;
+	min-width: 92px;
+	background: url(../img/flag/Belarus.png) right 2px no-repeat;
+	padding-right: 23px;
+}
+
+.Belgium {
+	display: inline-block;
+	min-width: 92px;
+	background: url(../img/flag/Belgium.png) right 2px no-repeat;
+	padding-right: 23px;
+}
+
+.BosniaandHerzegovina {
+	display: inline-block;
+	min-width: 92px;
+	background: url(../img/flag/BosniaandHerzegovina.png) right 2px no-repeat;
+	padding-right: 23px;
+}
+
+.Bulgaria {
+	display: inline-block;
+	min-width: 92px;
+	background: url(../img/flag/Bulgaria.png) right 2px no-repeat;
+	padding-right: 23px;
+}
+
+.Croatia {
+	display: inline-block;
+	min-width: 92px;
+	background: url(../img/flag/Croatia.png) right 2px no-repeat;
+	padding-right: 23px;
+}
+
+.CzechRepublic {
+	display: inline-block;
+	min-width: 92px;
+	background: url(../img/flag/CzechRepublic.png) right 2px no-repeat;
+	padding-right: 23px;
+}
+
+.Denmark {
+	display: inline-block;
+	min-width: 92px;
+	background: url(../img/flag/Denmark.png) right 2px no-repeat;
+	padding-right: 23px;
+}
+
+.Dubayy {
+	display: inline-block;
+	min-width: 92px;
+	background: url(../img/flag/Dubayy.png) right 2px no-repeat;
+	padding-right: 23px;
+}
+
+.Estonia {
+	display: inline-block;
+	min-width: 92px;
+	background: url(../img/flag/Estonia.png) right 2px no-repeat;
+	padding-right: 23px;
+}
+
+.Finland {
+	display: inline-block;
+	min-width: 92px;
+	background: url(../img/flag/Finland.png) right 2px no-repeat;
+	padding-right: 23px;
+}
+
+.France {
+	display: inline-block;
+	min-width: 92px;
+	background: url(../img/flag/France.png) right 2px no-repeat;
+	padding-right: 23px;
+}
+
+.Germany {
+	display: inline-block;
+	min-width: 92px;
+	background: url(../img/flag/Germany.png) right 2px no-repeat;
+	padding-right: 23px;
+}
+
+.Greece {
+	display: inline-block;
+	min-width: 92px;
+	background: url(../img/flag/Greece.png) right 2px no-repeat;
+	padding-right: 23px;
+}
+
+.Hungary {
+	display: inline-block;
+	min-width: 92px;
+	background: url(../img/flag/Hungary.png) right 2px no-repeat;
+	padding-right: 23px;
+}
+
+.Iceland {
+	display: inline-block;
+	min-width: 92px;
+	background: url(../img/flag/Iceland.png) right 2px no-repeat;
+	padding-right: 23px;
+}
+
+.Ireland {
+	display: inline-block;
+	min-width: 92px;
+	background: url(../img/flag/Ireland.png) right 2px no-repeat;
+	padding-right: 23px;
+}
+
+.Italy {
+	display: inline-block;
+	min-width: 92px;
+	background: url(../img/flag/Italy.png) right 2px no-repeat;
+	padding-right: 23px;
+}
+
+.Latvia {
+	display: inline-block;
+	min-width: 92px;
+	background: url(../img/flag/Latvia.png) right 2px no-repeat;
+	padding-right: 23px;
+}
+
+.Liechtenstein {
+	display: inline-block;
+	min-width: 92px;
+	background: url(../img/flag/Liechtenstein.png) right 2px no-repeat;
+	padding-right: 23px;
+}
+
+.Lithuania {
+	display: inline-block;
+	min-width: 92px;
+	background: url(../img/flag/Lithuania.png) right 2px no-repeat;
+	padding-right: 23px;
+}
+
+.Luxembourg {
+	display: inline-block;
+	min-width: 92px;
+	background: url(../img/flag/Luxembourg.png) right 2px no-repeat;
+	padding-right: 23px;
+}
+
+.Malta {
+	display: inline-block;
+	min-width: 92px;
+	background: url(../img/flag/Malta.png) right 2px no-repeat;
+	padding-right: 23px;
+}
+
+.Monaco {
+	display: inline-block;
+	min-width: 92px;
+	background: url(../img/flag/Monaco.png) right 2px no-repeat;
+	padding-right: 23px;
+}
+
+.Montenegro {
+	display: inline-block;
+	min-width: 92px;
+	background: url(../img/flag/Montenegro.png) right 2px no-repeat;
+	padding-right: 23px;
+}
+
+.Netherlands {
+	display: inline-block;
+	min-width: 92px;
+	background: url(../img/flag/Netherlands.png) right 2px no-repeat;
+	padding-right: 23px;
+}
+
+.Norway {
+	display: inline-block;
+	min-width: 92px;
+	background: url(../img/flag/Norway.png) right 2px no-repeat;
+	padding-right: 23px;
+}
+
+.Portugal {
+	display: inline-block;
+	min-width: 92px;
+	background: url(../img/flag/Portugal.png) right 2px no-repeat;
+	padding-right: 23px;
+}
+
+.RepublicofMoldova {
+	display: inline-block;
+	min-width: 92px;
+	background: url(../img/flag/RepublicofMoldova.png) right 2px no-repeat;
+	padding-right: 23px;
+}
+
+.Romania {
+	display: inline-block;
+	min-width: 92px;
+	background: url(../img/flag/Romania.png) right 2px no-repeat;
+	padding-right: 23px;
+}
+
+.RussianFederation {
+	display: inline-block;
+	min-width: 92px;
+	background: url(../img/flag/RussianFederation.png) right 2px no-repeat;
+	padding-right: 23px;
+}
+
+.SanMarino {
+	display: inline-block;
+	min-width: 92px;
+	background: url(../img/flag/SanMarino.png) right 2px no-repeat;
+	padding-right: 23px;
+}
+
+.Serbia {
+	display: inline-block;
+	min-width: 92px;
+	background: url(../img/flag/Serbia.png) right 2px no-repeat;
+	padding-right: 23px;
+}
+
+.Slovakia {
+	display: inline-block;
+	min-width: 92px;
+	background: url(../img/flag/Slovakia.png) right 2px no-repeat;
+	padding-right: 23px;
+}
+
+.Slovenia {
+	display: inline-block;
+	min-width: 92px;
+	background: url(../img/flag/Slovenia.png) right 2px no-repeat;
+	padding-right: 23px;
+}
+
+.Sweden {
+	display: inline-block;
+	min-width: 92px;
+	background: url(../img/flag/Sweden.png) right 2px no-repeat;
+	padding-right: 23px;
+}
+
+.Switzerland {
+	display: inline-block;
+	min-width: 92px;
+	background: url(../img/flag/Switzerland.png) right 2px no-repeat;
+	padding-right: 23px;
+}
+
+.TheformerYugoslavRepublicofMacedonia {
+	display: inline-block;
+	min-width: 92px;
+	background: url(../img/flag/TheformerYugoslavRepublicofMacedonia.png) right 2px no-repeat;
+	padding-right: 23px;
+}
+
+.Ukraine {
+	display: inline-block;
+	min-width: 92px;
+	background: url(../img/flag/Ukraine.png) right 2px no-repeat;
+	padding-right: 23px;
+}
+
+.UnitedKingdomofGreatBritainandNorthernIreland {
+	display: inline-block;
+	min-width: 92px;
+	background: url(../img/flag/UnitedKingdomofGreatBritainandNorthernIreland.png) right 2px no-repeat;
+	padding-right: 23px;
+}
+
+.UAE {
+	display: inline-block;
+	min-width: 92px;
+	background: url(../img/flag/UAE.png) right 0px no-repeat;
+	padding-right: 23px;
+}
+
+.SAfrica {
+	display: inline-block;
+	min-width: 92px;
+	background: url(../img/flag/SAfrica.png) right 3px no-repeat;
+	padding-right: 23px;
+}
+
+.mb10 {
+	margin-bottom: 10px;
+}
+
+.mb20 {
+	margin-bottom: 20px;
+}
+
+.mb30 {
+	margin-bottom: 30px;
+}
+
+.mt50 {
+	margin-top: 50px;
+}
+
+.pt20 {
+	padding-top: 20px;
+}
+
+.pb20 {
+	padding-bottom: 20px;
+}
+
+.pt30 {
+	padding-top: 30px;
+}
+
+.pt15 {
+	padding-top: 15px;
+}
