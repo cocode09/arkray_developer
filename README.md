@@ -1,1 +1,0 @@
-# arkray_developer
