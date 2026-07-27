@@ -251,7 +251,6 @@ wp_head();
 						<li><a href="<?php echo $business_url; ?>"<?php echo $sub_ac("corporate-outline"); ?>><?php echo esc_html( arkray_t( 'Corporate Outline' ) ); ?></a></li>
 						<li><a href="<?php echo $history_about_url; ?>"<?php echo $sub_ac("history"); ?>><?php echo esc_html( arkray_t( 'History' ) ); ?></a></li>
 						<li><a href="<?php echo $group_url; ?>"<?php echo $sub_ac("arkray-group"); ?>><?php echo esc_html( arkray_t( 'ARKRAY Group' ) ); ?></a></li>
-						<li><a href="<?php echo $action_guide_url; ?>"<?php echo $sub_ac("arkray-action-guidelines"); ?>><?php echo esc_html( arkray_t( 'ARKRAY Action Guidelines' ) ); ?></a></li>
 						<li><a href="<?php echo $company_profile_pdf; ?>" target="_blank"><?php echo esc_html( arkray_t( 'Download Company Profile [PDF]' ) ); ?></a></li>
 					</ul>
 				</li>
@@ -277,7 +276,6 @@ wp_head();
 				<li><a href="<?php echo $business_url; ?>"<?php echo $sub_ac("corporate-outline"); ?>><?php echo esc_html( arkray_t( 'Corporate Outline' ) ); ?></a></li>
 				<li><a href="<?php echo $history_about_url; ?>"<?php echo $sub_ac("history"); ?>><?php echo esc_html( arkray_t( 'History' ) ); ?></a></li>
 				<li><a href="<?php echo $group_url; ?>"<?php echo $sub_ac("arkray-group"); ?>><?php echo esc_html( arkray_t( 'ARKRAY Group' ) ); ?></a></li>
-				<li><a href="<?php echo $action_guide_url; ?>"<?php echo $sub_ac("arkray-action-guidelines"); ?>><?php echo esc_html( arkray_t( 'ARKRAY Action Guidelines' ) ); ?></a></li>
 				<li><a href="<?php echo $company_profile_pdf; ?>" target="_blank"><?php echo esc_html( arkray_t( 'Download Company Profile [PDF]' ) ); ?></a></li>
 			</ul>
 		</li>
@@ -340,10 +338,6 @@ wp_head();
 				<div class="column">
 					<h2><a href="<?php echo $philosophy_url; ?>"<?php echo $sub_ac("arkray-philosophy"); ?>><?php echo esc_html( arkray_t( 'ARKRAY Philosophy' ) ); ?></a></h2>
 					<p><a href="<?php echo $philosophy_url; ?>"<?php echo $sub_ac("arkray-philosophy"); ?>><img src="<?php echo esc_url( $theme_img_uri . '/about10.jpg' ); ?>" alt="ARKRAY Philosophy" width="350" height="80"></a></p>
-				</div>
-				<div class="column">
-					<h2><a href="<?php echo $action_guide_url; ?>"<?php echo $sub_ac("arkray-action-guidelines"); ?>><?php echo esc_html( arkray_t( 'ARKRAY Action Guidelines' ) ); ?></a></h2>
-					<p><a href="<?php echo $action_guide_url; ?>"<?php echo $sub_ac("arkray-action-guidelines"); ?>><img src="<?php echo esc_url( $theme_img_uri . '/about11.jpg' ); ?>" alt="<?php echo esc_attr( arkray_t( 'ARKRAY Action Guidelines' ) ); ?>" width="350" height="80"></a></p>
 				</div>
 			</div>
 
