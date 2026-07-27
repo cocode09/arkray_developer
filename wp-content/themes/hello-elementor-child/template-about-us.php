@@ -38,7 +38,7 @@ $group3_url         = esc_url( arkray_get_about_page_url( 'arkray-group-3' ) );
 $group4_url         = esc_url( arkray_get_about_page_url( 'arkray-group-4' ) );
 $group5_url         = esc_url( arkray_get_about_page_url( 'arkray-group-5' ) );
 $action_guide_url   = esc_url( arkray_get_about_page_url( 'arkray-action-guidelines' ) );
-$sustainable_procurement_url = esc_url( arkray_get_about_page_url( 'sustainable-procurement-standards' ) );
+$sustainable_procurement_url = esc_url( 'https://www.arkray.co.jp/english/sustainability/action/supplychain/post_32.html' );
 $company_profile_pdf = esc_url( 'https://www.arkray.co.jp/english/corpo/profile_e.pdf' );
 
 // ── Current sub-page slug routing ──────────────────────────────────────────
@@ -374,8 +374,8 @@ wp_head();
 					<p><a href="<?php echo $group_url; ?>"<?php echo $sub_ac("arkray-group"); ?>><img src="<?php echo esc_url( $theme_img_uri . '/about06.jpg' ); ?>" alt="ARKRAY Group" width="350" height="80"></a></p>
 				</div>
 				<div class="column">
-					<h2><a href="<?php echo $sustainable_procurement_url; ?>"><span class="font_size01"><?php echo esc_html( arkray_t( 'Sustainable Procurement Standards' ) ); ?></span></a></h2>
-					<p><a href="<?php echo $sustainable_procurement_url; ?>"><img alt="sustainability.jpg" src="https://www.arkray.co.jp/english/upload/img/sustainability.jpg" width="350" height="80" class="mt-image-none" /></a></p>
+					<h2><a href="<?php echo $sustainable_procurement_url; ?>" target="_blank" rel="noopener noreferrer"><span class="font_size01"><?php echo esc_html( arkray_t( 'Sustainable Procurement Standards' ) ); ?></span></a></h2>
+					<p><a href="<?php echo $sustainable_procurement_url; ?>" target="_blank" rel="noopener noreferrer"><img alt="sustainability.jpg" src="https://www.arkray.co.jp/english/upload/img/sustainability.jpg" width="350" height="80" class="mt-image-none" /></a></p>
 				</div>
 			</div>
 
