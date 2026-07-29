@@ -25,6 +25,16 @@ remove_filter( 'the_excerpt', 'wptexturize' );
 remove_action( 'wp_head', 'wp_generator' );
 
 /**
+ * Site name shown in browser titles and other theme chrome.
+ *
+ * @return string
+ */
+function arkray_get_site_name() {
+	return 'ARKRAY, Inc.';
+}
+add_filter( 'option_blogname', 'arkray_get_site_name' );
+
+/**
  * Restrict the REST API to logged-in editors.
  *
  * Custom post types are registered with show_in_rest, which otherwise exposes

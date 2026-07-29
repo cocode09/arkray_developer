@@ -65,7 +65,7 @@ $rec_render_job_submenu = static function () use ( $rec_nav_jobs, $rec_current_j
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="format-detection" content="telephone=no">
 <meta content="width=device-width, initial-scale=1.0" name="viewport">
-<title><?php echo esc_html( $rec_page_title ); ?> | ARKRAY, Inc.</title>
+<title><?php echo esc_html( $rec_page_title ); ?> | <?php bloginfo( 'name' ); ?></title>
 <meta name="description" content="<?php bloginfo( 'description' ); ?>">
 <?php wp_head(); ?>
 </head>
