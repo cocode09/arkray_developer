@@ -230,6 +230,11 @@ $bnr03_src     = $theme_dir_uri . '/img/arkray4u_banner.jpg';
 			<h2><?php echo esc_html( arkray_t( 'Products' ) ); ?></h2>
 			<div class="line">
 				<?php
+				$category_images = array(
+					'diabetes'   => arkray_get_arkray_asset_url( 'xn-l-analyzer.png' ),
+					'urinalysis' => arkray_get_arkray_asset_url( 'ax-4030-home.png' ),
+				);
+
 				$product_categories = get_terms( array(
 					'taxonomy'   => 'product_category',
 					'hide_empty' => false,
@@ -279,14 +284,18 @@ $bnr03_src     = $theme_dir_uri . '/img/arkray4u_banner.jpg';
 					<?php endif;
 					$is_first = false;
 
-					// Image: ACF field or first product thumbnail
+					// Image: authoritative override, ACF field, or first product thumbnail
 					if ( isset( $pcat->_img ) ) {
 						$cat_img = $pcat->_img;
 						$cat_url = $pcat->_url;
 					} else {
-						$cat_img = get_term_meta( $pcat->term_id, 'category_image', true );
-						if ( ! $cat_img ) {
-							$cat_img = get_field( 'category_image', 'product_category_' . $pcat->term_id );
+						if ( isset( $category_images[ $pcat->slug ] ) && $category_images[ $pcat->slug ] ) {
+							$cat_img = $category_images[ $pcat->slug ];
+						} else {
+							$cat_img = get_term_meta( $pcat->term_id, 'category_image', true );
+							if ( ! $cat_img ) {
+								$cat_img = get_field( 'category_image', 'product_category_' . $pcat->term_id );
+							}
 						}
 						if ( ! $cat_img ) {
 							$first_p = get_posts( array(
