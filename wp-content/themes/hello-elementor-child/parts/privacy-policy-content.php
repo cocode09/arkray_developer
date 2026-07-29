@@ -2,10 +2,9 @@
 /**
  * Privacy Policy — #editor_area content.
  *
- * Verbatim port of the #editor_area block from the ARKRAY Privacy Policy
- * reference page (Sandbox/ARKRAY Privacy Policy _ ARKRAY, Inc..html).
- * Classes h1_index, h2_content, h3_content, tx, indent01, indent02, link_tx
- * are styled by assets/arkray-content.css.
+ * English sections from ARKRAY Vietnam Personal Data Protection Policy Notice
+ * (vn_privacy_policy.pdf). Classes h1_index, h2_content, h3_content, tx,
+ * indent01, indent02 are styled by assets/arkray-content.css.
  *
  * @package HelloElementorChild
  */
@@ -15,125 +14,110 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 ?>
 <h1 class="h1_index">ARKRAY Privacy Policy</h1>
-<p class="tx">In order for you to use our products with peace of mind, ARKRAY, Inc. and its affiliate companies: ARKRAY Marketing, Inc.; ARKRAY Global Business, Inc.; ARKRAY Factory, Inc.; ARKRAY Infinity, Inc., and Karada Lab, Inc. will observe the laws pertaining to personal information and our company regulations for protection of personal information (ARKRAY Group Regulations, "Regulations for the handling of personal information") and will undertake the following measures for the protection of personal information. ARKRAY's policy regarding the protection and management of personal information on this site is outlined below.</p>
-<h2 class="h2_content">1.What information we collect </h2>
-<p>On this site, we will ask for your personal information when you engage in the following activities.</p>
-<p class="indent01">(1) Downloading software: your name, address, telephone number, date of birth, company, occupation, E-mail address etc. </p>
-<p class="indent01">(2) Applying for a job: your name, address, telephone number, date of birth, alma mater, business carrier, E-mail address etc. </p>
-<p class="indent01 tx">(3) Requesting information materials: your name, address, telephone number, company, E-mail address etc.</p>
-<h2 class="h2_content">2. How we use the collected information </h2>
-<p class="tx">We will use the information in clause 1 only for the purposes provided below.<br>
-Clause 1 (1): <br>&nbsp;&nbsp;user registration and/or delivery of upgrade information.<br>
-Clause 1 (2): <br>&nbsp;&nbsp;candidate selection, notice of our company information session and direct mailing to the candidate.<br>
-Clause 1 (3): <br>&nbsp;&nbsp;delivery of information materials and response to inquiries.</p>
-<h2 class="h2_content">3. When we disclose your information </h2>
-<p>We will not disclose your personal information to any third parties except under the following circumstances. </p>
-<p class="indent02">* Disclosure to ARKRAY's subcontractors or business partners (sales representatives, shipping companies etc.) to fulfill the purposes provided in clause 2. </p>
-<p class="indent02">* When required to by law. </p>
-<p class="indent02 tx">* When your approval is obtained.</p>
-<p class="tx">In the event that we disclose your personal information to a third party, we will require them to enter a contract ensuring the confidentiality and prohibiting the further dissemination of your personal information, thereby implementing appropriate information management.</p>
-<h2 class="h2_content">4. How you can change or delete your information </h2>
-<p class="tx">In the event that you wish to change or delete previously registered information, for any reason, we will provide the means to change or delete the information via E-mail or the user registration screen etc.</p>
-<h2 class="h2_content">5. How we protect your personal information within our company</h2>
-<p class="tx">In order to protect your personal information, we will establish our secure system within the company by appointing a manager for our privacy practices and by implementing appropriate management.<br>
-We also provide our guidelines for handling personal information as part of the labor regulations and communicate them to our employees and will provide education and direction to employees on the handling of personal information and be thorough in assuring adherence to these regulations.</p>
-<h2 class="h2_content">6. How we improve our privacy practices </h2>
-<p class="tx">In addition to observing applicable laws and regulations regarding the handling of personal information, we will adequately review and amend our privacy policy.</p>
-<h2 class="h2_content">7. How you can contact us about our privacy policy </h2>
-<p class="tx">Please send opinions and questions as well as requests regarding confirmation, alteration or deletion of personal information registered with ARKRAY, Inc. and its affiliate companies to the below. </p>
-<p style="padding-left:1em;text-indent:-1em;">*Please specify the desired handling of your request in the "Content of Inquiry" field.
-e.g., "Regarding changes to personal information", "Regarding deletion of personal information", "Inquiry regarding handling of personal information", etc.
-</p>
-<p class="tx">ARKRAY, Inc. Group Support Team<br>
-	Yousuien-nai, 59 Gansuin-cho, Kamigyo-ku, Kyoto 602-0008, JAPAN<br>
-	TEL: +81-75-662-8979</p>
-<p><a href="<?php echo esc_url( arkray_get_contact_page_url() ); ?>" class="link_tx" target="_blank" rel="noopener noreferrer">Contact Us</a></p>
 
+<p class="tx">Dear Esteemed Customer,</p>
 
-<h1 class="h1_index" style="margin-top:60px;">ARKRAY Privacy Notice</h1>
-<p class="tx" style="text-align:right;">Last revised: June 2021</p>
-<p class="tx">This Privacy Notice is to comply with General Data Protection Regulation (GDPR). This Privacy Notice is only applicable when General Data Protection Regulation in the European Union or the data protection law in the United Kingdom is applied.</p>
-<h2 class="h2_content">General privacy statement</h2>
-<p class="tx">At ARKRAY, Inc. ("ARKRAY"), we are committed to protecting your personal information. This Privacy Notice outlines the types of personal information ARKRAY may collect; the means by which ARKRAY may collect, use, or share your personal information; the steps ARKRAY takes to protect your personal information; and the choices you have with respect to the use of your personal information.</p>
-<p class="tx">This Privacy Notice applies to ARKRAY websites that are linked to this Notice.</p>
-<p class="tx">For the purposes of this Privacy Notice, "Personal Data" means any information by which you can be individually identified both directly and indirectly, including, but not limited to, your name, address, e-mail address, and telephone number.</p>
-<h2 class="h2_content">Identity and contact details of the data controller and the EU/UK representative</h2>
-<p class="tx"><strong>The data controller is ARKRAY.</strong><br>
-Address: Yousuien-nai, 59 Gansuin-cho, Kamigyo-ku, Kyoto 602-0008, Japan<br>
-E-mail address: arkray_connect@arkray.co.jp<br>
-Name of CEO: Yukitoshi Yao</p>
-<p class="tx"><strong>The EU representative is ARKRAY Italia S.R.L.</strong><br>
-Address: Building Quercia 9F, Via Torri Bianche 9, 20871 Vimercate (MB), ITALY<br>
-E-mail address: info.italy@arkray.com</p>
-<p class="tx"><strong>The UK representative is ARKRAY Limited</strong><br>
-Address: Beacon House Stokenchurch Business Park, Ibstone Road, Stokenchurch, High Wycombe, Buckinghamshire, England, HP14 3FE<br>
-E-mail address: info.unitedkingdom@arkray.com</p>
-<h2 class="h2_content">How and why we process your personal data</h2>
-<p class="tx">On this website, we may collect the following Personal Data about you.</p>
-<ul>
-	<li>Name</li>
-	<li>Contact address (e-mail address, telephone number)</li>
-	<li>Occupation</li>
-	<li>Job title</li>
-	<li>Workplace</li>
-	<li>IP Address</li>
-	<li>Geographic location</li>
-	<li>Cookies</li>
-</ul>
-<p class="tx">We process your Personal Data on our websites for the following purposes:</p>
-<h3 class="h3_content" style="border-bottom:none; color:#000;">To respond to your requests or inquiries</h3>
-<p class="tx">We may use your Personal Data that you provide to us to take necessary steps to respond to your requests, such as requests for medical information, inquiries about our products, or requests to subscribe to our mailing list. At your request, we may collect your contact information (such as your name, mailing address, telephone number and job title), your interests and preferences (such as products or areas of interest), and any other information you provide to us.</p>
-<h3 class="h3_content" style="border-bottom:none; color:#000;">To complete a transaction</h3>
-<p class="tx">Some parts of our website may collect your Personal Data to fulfill services that you have requested and to understand your interests and preferences. In these instances, we may collect your contact information as well as a history of your previous transactions with us (such as order history and customer account information).</p>
-<h3 class="h3_content" style="border-bottom:none; color:#000;">To provide information on products and services</h3>
-<p class="tx">We may provide you with information on our products, seminars, or any other medical information which we judge may be of interest to you, and information related to maintenance services.</p>
-<h3 class="h3_content" style="border-bottom:none; color:#000;">To maintain our websites, including for security purposes</h3>
-<p class="tx">We use your Personal Data, such as IP Address, geographic location, the resources you have accessed, and similar information, to secure our websites, network systems, and other assets.</p>
-<h3 class="h3_content" style="border-bottom:none; color:#000;">To measure advertising effectiveness</h3>
-<p class="tx">We may use the data about your visits to this website in order to measure advertising effectiveness and to provide advertisements about our goods and services that may be of interest to you.</p>
-<p class="tx">Please be aware that certain features of this site may not be available to you if you do not provide certain Personal Data. Any Personal Data you provide to us on our websites will be used in accordance with this Privacy Notice.</p>
-<h2 class="h2_content">Legal basis of processing</h2>
-<p class="tx">We may process your Personal Data when processing is required for the pursuit of our or a third party's legitimate interests, such as promoting our business and protecting our websites.</p>
-<p class="tx">We may also process your Personal Data when you give us your consent.</p>
-<h2 class="h2_content">Recipients of your personal data</h2>
-<p class="tx">We may share the following of your Personal Data with ARKRAY affiliates which have their principal place of business in Japan or outside Japan, currently the affiliates in the European Union or the United Kingdom (<a href="https://www.arkray.eu/english/about/group04.html#h1" target="_blank" rel="noopener noreferrer">https://www.arkray.eu/english/about/group04.html#h1</a>), within the framework of joint use under the Act on Protection of Personal Information:</p>
-<ul>
-	<li>Name</li>
-	<li>Contact address (e-mail address, telephone number)</li>
-	<li>Occupation</li>
-	<li>Job title</li>
-	<li>Workplace</li>
-</ul>
-<p class="tx">Our ARKRAY affiliates will use your Personal Data for the same purposes as specified in <i>"How and Why We Process Your Personal Data"</i> above.</p>
-<p class="tx">ARKRAY is the responsible party of this arrangement for the joint use of Personal Data.</p>
-<p class="tx">We may also share your Personal Data with third parties, such as our service providers, for the following purposes:</p>
-<h3 class="h3_content" style="border-bottom:none; color:#000;">To help fulfill ARKRAY business transactions</h3>
-<h3 class="h3_content" style="border-bottom:none; color:#000;">To conduct technical maintenance of our websites and other web platforms</h3>
-<h2 class="h2_content">International transfer of your personal data</h2>
-<p class="tx">We may transfer your Personal Data to a third party outside the EEA and/or the United Kingdom.</p>
-<p class="tx">Where we transfer your personal data to a third party outside the EEA and/or the United Kingdom, we will ensure that:</p>
-<ul>
-	<li>the recipient destination has been subject to a finding by the European Commission that it ensures an adequate level of protection for the rights and freedoms that you possess in respect of your personal data and/or the Government of the United Kingdom has specified the recipient destination as a country which ensures an adequate level of protection as provided under the Data Protection Act 2018; or</li>
-	<li>the recipient enters into standard data protection clauses with us that have been approved by the European Commission and/or the Government of the United Kingdom.</li>
-</ul>
-<p class="tx">You can obtain further details of the protection given to your personal data when it is transferred outside the EEA and/or the United Kingdom (including a copy of the standard data protection clauses which we have entered into with recipients of your personal data) by contacting us using the information about us above.</p>
-<h2 class="h2_content">Information about your rights regarding your personal data</h2>
-<p class="tx">You have the following rights with respect to your Personal Data:</p>
-<ul>
-	<li>The right to request access to the Personal Data that ARKRAY has about you.</li>
-	<li>The right to rectify or correct any Personal Data that is inaccurate or incomplete.</li>
-	<li>The right to request a copy of your Personal Data in electronic format so that you can transmit the data to third parties, or to request that ARKRAY directly transfer your Personal Data to third parties.</li>
-	<li><strong>The right to object to the processing of your Personal Data for marketing and other purposes.</strong></li>
-	<li>The right to request that your Personal Data be erased.</li>
-	<li>The right to request restrictions on the processing of your Personal Data to certain limited purposes.</li>
-	<li>The right to withdraw your consent at any time.</li>
-</ul>
-<p class="tx">Please note that the withdrawal of your consent does not affect the lawfulness of processing based on the consent provided before its withdrawal.</p>
-<p class="tx">To exercise any of these rights, please contact us using the information provided above.</p>
-<p class="tx">If you believe that our data processing does not comply with the GDPR, you can lodge a complaint with the competent supervisory authority.</p>
-<h2 class="h2_content">Retention period</h2>
-<p class="tx">We will retain your Personal Data for the period necessary to process it, which will not exceed 6 years from the termination of the business relationship with you or the last communication with you, except to the extent that we are required by applicable laws to retain it for a longer period of time, in which case we will retain it for the period required by applicable laws.</p>
-<h2 class="h2_content">Data security</h2>
-<p class="tx">ARKRAY and its service providers take reasonable steps to protect the Personal Data we access or receive through this website from loss, misuse, and unauthorized access, disclosure, alteration, or destruction. Nevertheless, ARKRAY makes no guarantee as to the security of your Personal Data and disclaims, to the fullest extent permitted by law, all liability and damages caused by loss, misuse, and unauthorized access, disclosure, alteration, or destruction. We recommend that you take all available precautions to protect the Personal Data you submit on this website.</p>
-<h2 class="h2_content">Updates to this privacy notice</h2>
-<p class="tx">From time to time, we may revise this Privacy Notice. Any such changes to this Privacy Notice will be reflected on this page.</p>
+<p class="tx">ARKRAY VIET NAM Co., ltd (hereinafter referred to as &ldquo;Arkray&rdquo;) would like to express herewith our sincere thanks to your kind support to Arkray so far.</p>
+
+<p class="tx">Reference is made to Decree No. 13/2023/ND-CP dated 17th April 2023, as amended and/or supplemented from time to time, on personal data protection which is effective from 1st July 2023 (&ldquo;Decree 13&rdquo;).</p>
+
+<p class="tx">In line with the requirements of the above Decree, Arkray values privacy and strives for the protection of the personal data (referred to as &ldquo;Personal Data&rdquo;) relating to individuals associated with the Customer. This may include but is not limited to any individual representative, involved to act on behalf of the Customer, director, officer, shareholder of a company, partner, trustee, attorney-in-fact, designated payee, representative, agent, nominee or any other person having a relationship with the Customer (referred to as &ldquo;Relevant Individuals&rdquo;) in connection with the transactions between the Customer and Arkray.</p>
+
+<p class="tx">This Policy Notice describes how Arkray as Personal Data Controller and/or Processor (as defined in Decree 13) collects and processes the Personal Data of Relevant Individuals, the purposes of such Personal Data, and the individual rights in relation to this Personal Data.</p>
+
+<h2 class="h2_content">1. Collection of Personal Data</h2>
+
+<p class="tx">Types of Personal Data that Arkray collects, subject to the applicable law, include but not limited to:</p>
+
+<p class="tx"><strong>Basic Personal Data:</strong></p>
+<p class="indent01">a) Last name, middle name and first name, other names (if any);</p>
+<p class="indent01">b) Gender;</p>
+<p class="indent01">c) Company;</p>
+<p class="indent01">d) Occupation;</p>
+<p class="indent01 tx">e) Phone number; email</p>
+
+<h2 class="h2_content">2. Purpose of Processing Personal Data</h2>
+
+<p class="tx">Processing of Personal Data means one or more operations which is performed on Personal Data, such as: collection, recording, analysis, confirmation, storage, correction, disclosure, combination, access, retrieval, recovery, encryption, decryption, duplication, sharing, transmission, provision, transfer, deletion, destruction of Personal Data or other relevant operations.</p>
+
+<p class="tx">The table below sets out the purposes for which Arkray processes Personal Data and its lawful basis for doing so:</p>
+
+<table class="mb15">
+	<tbody>
+		<tr>
+			<th colspan="2">Purposes of Processing Personal Data</th>
+		</tr>
+		<tr>
+			<th>1. Provision of products and/or services</th>
+			<td>
+				- To manage Arkray&rsquo;s relationship with the Customer<br>
+				- To communicate with the Customer via email, telephone, post or in person in relation to the use of Arkray&rsquo;s products and/or services
+			</td>
+		</tr>
+		<tr>
+			<th>2. Fulfilling legal obligations</th>
+			<td>- To submit regulatory reports to relevant authorities</td>
+		</tr>
+		<tr>
+			<th>3. Provision of customer support</th>
+			<td>
+				- To ensure customer satisfaction and provide professional customer support<br>
+				- To respond to inquiries and keep records of interactions, comments and/or complaints<br>
+				- To process the Customer&rsquo;s requests such as data correction, request of document, etc.
+			</td>
+		</tr>
+		<tr>
+			<th>4. Business operation of Arkray</th>
+			<td>
+				- To identify issues with products and services<br>
+				- To carry out and improve business activities<br>
+				- To do statistical reports, market research, analytic report (non-marketing / promoting product and services)<br>
+				- To plan the improvements to the existing products and services<br>
+				- To carry out and improve a business performance<br>
+				- To transfer data to parent company or group company of Arkray as well as its branches and subsidiaries for the purpose of internal control and process
+			</td>
+		</tr>
+		<tr>
+			<th>5. Marketing</th>
+			<td>
+				- To develop and carry out any marketing activities<br>
+				- To communicate with the Customer via email, telephone, post or in person about Arkray&rsquo;s products and/or services, events, other communications such as research and insights that the Customer may be interested in
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+<h2 class="h2_content">3. Rights of Data Subject</h2>
+
+<p class="tx">Relevant Individuals have certain rights regarding their personal data, subject to local regulations. These include the right to:</p>
+
+<p class="indent02">* <strong>Right to be informed:</strong> This enables the Customer and Relevant Individuals to be informed about what Arkray will do with Personal Data.</p>
+<p class="indent02">* <strong>Right to give consent:</strong> This enables the Customer (via the authorization scheme under the Civil Code) and Relevant Individuals to give consent to Arkray for processing the relevant Personal Data, except for the circumstances where consent is not required under the prevailing local regulations.</p>
+<p class="indent02">* <strong>Right of access:</strong> This enables the Customer and Relevant Individuals to access Personal Data and obtain a copy of Personal Data from Arkray by submitting a written request to Arkray.</p>
+<p class="indent02">* <strong>Right to correction:</strong> This enables the Customer and Relevant Individuals to have any inaccurate, outdated and/or incomplete Personal Data corrected.</p>
+<p class="indent02">* <strong>Right to withdraw consent:</strong> When Arkray processes Personal Data under the Customer&rsquo;s consent, this right enables the Customer and Relevant Individuals to withdraw its consent to Arkray&rsquo;s processing of Personal Data, which the Customer and Relevant Individuals can do at any time. Arkray may continue to process Personal Data if the applicable laws permit Arkray to do so. For avoidance of doubt, the withdrawal of consent by the Customer and/or Relevant Individuals shall not affect the lawfulness of the processing to which consent was given before it is withdrawn and the withdrawal of consent shall be expressed in writing or in a format that can be printed and reproduced in writing, including in electronic or verifiable format which is in accordance with the applicable internal regulations of Arkray from time to time.</p>
+<p class="indent02">* <strong>Right to deletion:</strong> This enables the Customer and Relevant Individuals to ask Arkray to delete Personal Data where there is no good reason for Arkray to continue to process it. The Customer also has the right to ask Arkray to delete Personal Data where the Customer has exercised the right to object processing (see below). Arkray may not delete all Personal Data if the applicable laws require Arkray to do so. Arkray will notify the Customer whether the deletion of Personal Data might impact the use of Arkray&rsquo;s services and products. Arkray will consider each request carefully in accordance with the Data requirements of any laws relating to the processing of Personal Data.</p>
+<p class="indent02">* <strong>Right of restriction of processing:</strong> This enables the Customer and Relevant Individuals to ask Arkray to suspend the processing of Personal Data until the Customer and Relevant Individuals give consent otherwise.</p>
+<p class="indent02">* <strong>Right to request the provision of data:</strong> In certain circumstances, the Customer and Relevant Individuals can request to receive a copy of Personal Data in a commonly used electronic format. Arkray will consider each request carefully in accordance with the requirements of any laws relating to the processing of Personal Data.</p>
+<p class="indent02">* <strong>Right to object processing:</strong> This enables the Customer and Relevant Individuals to object to the processing of Personal Data where Arkray is processing Personal Data for direct marketing purposes, or to prevent Arkray to disclose Personal Data, unless otherwise provided by law.</p>
+<p class="indent02 tx">* <strong>Right to file a complaint:</strong> This enables the Customer and Relevant Individuals to file the complaint with a related government authority in case where, in your view, Arkray fails to comply with data protection regulations.</p>
+
+<p class="tx">A person&rsquo;s ability to exercise these rights will depend on a number of factors and in some instances Arkray will not be able to agree to a request (for example, if the applicable laws require Arkray for not doing so or the right does not apply to the particular data Arkray holds about the person).</p>
+
+<p class="tx">Arkray may refuse to comply with your request if your request is clearly unfounded, repetitive or excessive.</p>
+
+<p class="tx">In the event that the Customer wishes to make the complaint about how Arkray processes Personal Data, please contact Arkray at our office and Arkray will try to consider your request as soon as possible. This does not prejudice your right to file the complaint with a government authority that has a data protection authority.</p>
+
+<h2 class="h2_content">Special Notes to the Customer</h2>
+
+<p class="tx">This Policy Notice shall be effective on the date on which the relevant provisions of Decree No. 13/2023/ND-CP (as amended from time to time) becomes effective against Arkray.</p>
+
+<p class="tx">With effect from 01st July 2023, this Policy Notice forms a part of all existing terms and conditions governing the Customer&rsquo;s relationship with Arkray (&ldquo;Terms and Conditions&rdquo;) and should be read in conjunction with those Terms and Conditions.</p>
+
+<p class="tx">This Policy Notice is made in both English and Vietnamese languages, of equal validity. In case of any inconsistency, the English language shall prevail.</p>
+
+<p class="tx">For any inquiry or information that you may need regarding this Policy Notice, please contact your person in charge at Arkray for further guidance.</p>
+
+<p class="tx">Sincerely Yours,</p>
+
+<p class="tx">For Arkray Viet Nam Co.,Ltd.</p>
