@@ -5586,6 +5586,8 @@ add_filter( 'query_vars', 'arkray_register_pcat_query_var' );
 function arkray_product_category_wp_slug_aliases() {
 	return array(
 		'near-patient-testing' => 'urinalysis',
+		'diabetes'             => 'laboratory-testing',
+		'osmolality'           => 'clinical-chemistry-reagents',
 	);
 }
 
