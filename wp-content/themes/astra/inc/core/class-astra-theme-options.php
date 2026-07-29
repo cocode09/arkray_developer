@@ -930,7 +930,7 @@ if ( ! class_exists( 'Astra_Theme_Options' ) ) {
 		 */
 		public static function get_astra_options() {
 			if ( is_null( self::$astra_options ) || is_customize_preview() ) {
-				self::$astra_options = get_option( ASTRA_THEME_SETTINGS );
+				self::$astra_options = get_option( ASTRA_THEME_SETTINGS, array() );
 			}
 			return self::$astra_options;
 		}
@@ -948,15 +948,18 @@ if ( ! class_exists( 'Astra_Theme_Options' ) ) {
 		 * Update theme static option array.
 		 */
 		public static function refresh() {
-			// Resolve defaults in the site locale, not the admin user's locale.
-			// This prevents admin-language strings from leaking into frontend defaults
-			// when the admin and site languages differ (e.g., WPML setups).
-			$site_locale = get_option( 'WPLANG' ) ?: 'en_US';
-			$switched    = false;
+			$switched = false;
 
-			if ( determine_locale() !== $site_locale ) {
-				$switched       = switch_to_locale( $site_locale );
-				self::$defaults = null;
+			if ( is_admin() ) {
+				// Resolve defaults in the site locale, not the admin user's locale.
+				// This prevents admin-language strings from leaking into frontend defaults
+				// when the admin and site languages differ (e.g., WPML setups).
+				$site_locale = get_option( 'WPLANG' ) ?: 'en_US';
+
+				if ( determine_locale() !== $site_locale ) {
+					$switched       = switch_to_locale( $site_locale );
+					self::$defaults = null;
+				}
 			}
 
 			self::$db_options = wp_parse_args(

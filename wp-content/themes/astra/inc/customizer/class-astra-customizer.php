@@ -440,7 +440,7 @@ if ( ! class_exists( 'Astra_Customizer' ) ) {
 		 * @return void
 		 */
 		public function print_footer_scripts() {
-			$output  = '<script type="text/javascript">';
+			$output = '<script type="text/javascript">';
 
 			$output .= '
 	        	wp.customize.bind(\'ready\', function() {
@@ -984,6 +984,9 @@ if ( ! class_exists( 'Astra_Customizer' ) ) {
 				case 'ast-section-toggle':
 					$config ['sanitize_callback'] = array( 'Astra_Customizer_Sanitizes', 'sanitize_toggle_control' );
 					break;
+				case 'ast-font-extras':
+					$config ['sanitize_callback'] = array( 'Astra_Customizer_Sanitizes', 'sanitize_font_extras' );
+					break;
 				default:
 					break;
 			}
@@ -1183,6 +1186,7 @@ if ( ! class_exists( 'Astra_Customizer' ) ) {
 						'header-builder' => astra_get_pro_url( '/pricing/', 'free-theme', 'customizer', 'header-builder' ),
 						'footer-builder' => astra_get_pro_url( '/pricing/', 'free-theme', 'customizer', 'footer-builder' ),
 						'sidebar'        => astra_get_pro_url( '/pricing/', 'free-theme', 'customizer', 'sidebar' ),
+						'menus'          => astra_get_pro_url( '/pricing/', 'free-theme', 'customizer', 'menus' ),
 						'woocommerce'    => astra_get_pro_url( '/pricing/', 'free-theme', 'customizer', 'woocommerce' ),
 						'blog-single'    => astra_get_pro_url( '/pricing/', 'free-theme', 'customizer', 'blog-single' ),
 						'blog-archive'   => astra_get_pro_url( '/pricing/', 'free-theme', 'customizer', 'blog-archive' ),
@@ -1527,6 +1531,19 @@ if ( ! class_exists( 'Astra_Customizer' ) ) {
 
 			// Customizer Controls.
 			wp_enqueue_style( 'astra-customizer-controls-css', ASTRA_THEME_URI . 'assets/css/minified/customizer-controls' . $css_prefix, null, ASTRA_THEME_VERSION );
+
+			// Sync customizer accent colors with WP admin color scheme.
+			if ( apply_filters( 'astra_customizer_match_admin_color_scheme', true ) ) {
+				$admin_color_css = 'body {
+					--ast-customizer-color-1: var(--wp-admin-theme-color, #0284c7);
+					--ast-customizer-color-2: var(--wp-admin-theme-color, #0ea5e9);
+					--ast-customizer-color-3: var(--wp-admin-theme-color-darker-10, #2271b1);
+					--ast-customizer-primary-color: var(--wp-admin-theme-color, #0284c7);
+					--ast-customizer-alternate-primary-color: var(--wp-admin-theme-color, #0ea5e9);
+					--ast-customizer-active-border-color: var(--wp-admin-theme-color, #0ea5e9);
+				}';
+				wp_add_inline_style( 'astra-customizer-controls-css', $admin_color_css );
+			}
 
 			wp_enqueue_script( 'astra-customizer-style-guide-js', ASTRA_THEME_URI . 'assets/js/' . $dir . '/customizer-style-guide' . $js_prefix, array( 'jquery', 'astra-customizer-controls-toggle-js' ), ASTRA_THEME_VERSION, true );
 			wp_localize_script(

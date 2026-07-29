@@ -7250,6 +7250,34 @@ function arkray_sanitize_attachment_id_list( $value ) {
 }
 
 /**
+ * Sanitize a list of attachment IDs down to a comma-separated string.
+ *
+ * The Customizer stores this as a scalar because textarea controls run the
+ * stored value through esc_textarea(), which throws a TypeError on arrays and
+ * takes the whole Customizer screen down with it.
+ */
+function arkray_sanitize_attachment_id_list_field( $value ) {
+	return implode( ',', arkray_sanitize_attachment_id_list( $value ) );
+}
+
+/**
+ * Earlier revisions saved this theme mod as an int array, so coerce on read.
+ */
+function arkray_normalize_slider_images_theme_mod( $value ) {
+	return is_array( $value ) ? arkray_sanitize_attachment_id_list_field( $value ) : $value;
+}
+add_filter( 'theme_mod_arkray_slider_images', 'arkray_normalize_slider_images_theme_mod' );
+
+/**
+ * Hero slider attachment IDs as an int array.
+ *
+ * @return int[]
+ */
+function arkray_get_slider_image_ids() {
+	return arkray_sanitize_attachment_id_list( get_theme_mod( 'arkray_slider_images', '' ) );
+}
+
+/**
  * Register Customizer controls so editors can manage hero slider + sidebar
  * widget images without touching theme code.
  */
@@ -7260,13 +7288,13 @@ function arkray_customize_register( $wp_customize ) {
 		'description' => __( 'Hero slider images and right-sidebar widget banners.', 'arkray' ),
 	) );
 
-	// Hero slider images (multiple attachment IDs, stored as int array).
+	// Hero slider images (multiple attachment IDs, stored as a comma-separated list).
 	$wp_customize->add_setting( 'arkray_slider_images', array(
-		'default'           => array(),
+		'default'           => '',
 		'type'              => 'theme_mod',
 		'capability'        => 'edit_theme_options',
 		'transport'         => 'refresh',
-		'sanitize_callback' => 'arkray_sanitize_attachment_id_list',
+		'sanitize_callback' => 'arkray_sanitize_attachment_id_list_field',
 	) );
 
 	$wp_customize->add_control( 'arkray_slider_images', array(

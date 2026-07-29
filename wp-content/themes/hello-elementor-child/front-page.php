@@ -49,8 +49,7 @@ foreach ( $slide_defs as $slide_def ) {
 	}
 }
 if ( empty( $slides ) ) {
-	$slider_images = get_theme_mod( 'arkray_slider_images', array() );
-	foreach ( $slider_images as $attachment_id ) {
+	foreach ( arkray_get_slider_image_ids() as $attachment_id ) {
 		$src = wp_get_attachment_image_url( (int) $attachment_id, 'large' );
 		if ( $src ) {
 			$slides[] = array(

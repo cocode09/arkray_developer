@@ -1,5 +1,60 @@
 *** Astra Changelog ***
 
+2026-07-28 - version 4.13.8
+* Fix: Theme palette colors selected in the Elementor editor reverting to the Customizer default, a regression introduced in 4.13.7.
+
+2026-06-28 - version 4.13.7
+* Improvement: WooCommerce - Added proper spacing between product quantity and subscription price in the checkout order review table when WooCommerce Subscriptions is active, so they no longer appear flush together.
+* Improvement: Social icon Phone, Email, and WhatsApp links no longer get double-prefixed when the entered value already includes tel:, mailto:, or a full WhatsApp link.
+* Fix: Shortcodes in the Header/Footer Builder HTML element, including inside href attributes, no longer stripped during sanitization.
+* Fix: Load Google Fonts Locally failing with a CORS block on single installs serving multiple domains from one filesystem (e.g. WPML "different domains per language"); local font URLs are now root-relative so each domain resolves fonts against its own origin.
+* Fix: Duplicate `id="email"` from the Social Icons Email icon breaking guest checkout with the WooCommerce Checkout block and Stripe.
+* Fix: Desktop toggle dropdown closing when clicking a parent menu item with children in "Dropdown Target: Link" mode.
+* Fix: Handled an edge case on the Elementor globals REST endpoint where a WP_Error returned by the route callback could cause a PHP error.
+
+2026-07-06 - version 4.13.6
+* Fix: Reverted a 4.13.5 change that stripped form elements, style tags, and data attributes from shortcode output in the Header/Footer Builder HTML element.
+* Fix: Body font size rendering as 0px/0% on PHP 8.0+ when the stored desktop value is integer 0, caused by a loose comparison that only masked this on PHP 7.x.
+
+2026-06-30 - version 4.13.5
+* Improvement: Navigation's submenu dropdown arrow touch target size improved for better WCAG 2.5.5 accessibility compliance.
+* Fix: Shortcodes inside href attributes in Header/Footer Builder HTML elements being stripped — caused by wp_kses running before do_shortcode, regression since v4.11.11.
+* Fix: Support widget and AI Assistant hidden from the Astra dashboard when white label is active, preventing Astra branding from being visible to white-label users.
+* Fix: Editor stylesheets triggering "added to iframe incorrectly" console warnings in WP 7.0.
+* Fix: Block editor throwing SecurityError on sites where iframe canvas is cross-origin, by wrapping all iframe document accesses in a safe helper with try-catch.
+* Fix: Page scroll position jumps to top when closing cart flyout drawer, caused by focus returning to the cart icon without preventing scroll.
+* Fix: WooCommerce error log flood caused by passing related products limit as a string instead of an integer to wc_get_related_products().
+* Fix: MCP astra-update-global-palette tool schema corrections to ensure colors and applied_preset are typed correctly.
+* Fix: Incorrect plugin icons for Cart Abandonment Recovery in the "Extend Your Website" dashboard section.
+* Fix: Color picker in the Customizer closing unexpectedly when dragging the panel scrollbar.
+* Fix: Incorrect social icon labels for Vimeo, Twitter, YouTube, WhatsApp, Snapchat, and other brand icons in the SVG icon picker.
+
+2026-06-02 - version 4.13.4
+* New: Added a "Show AI Assistant" toggle in Dashboard Settings to allow users to show or hide the AI Assistant icon from the Astra Dashboard.
+* Fix: Resolved dual header display and header button visibility issues at the mobile/desktop breakpoint.
+* Fix: Accessibility outline toggle not working correctly after importing Astra settings, causing focus outline to persist when disabled or not appear when enabled.
+* Fix: Elementor button hover color overridden by :visited rule due to CSS output order in Astra's inline styles.
+* Fix: Astra's admin scripts no longer override the native window.open globally, preventing conflicts with third-party plugins like WooCommerce.
+* Fix: Prevented PHP fatal in webfont and docs filesystem helpers when running on FTP-based hosts without WordPress credentials.
+* Fix: Customizer controls crashing with TypeError when SVG icons had not finished loading.
+
+2026-05-20 - version 4.13.3
+* New: Added PowerfulDocs AI support widget to the Astra admin dashboard — accessible via the floating Astra icon.
+* Improvement: Compatibility with WordPress 7.0.
+* Improvement: Header Builder menu now respects astra_schema_enabled and astra_site_navigation_schema_enabled filters to control schema markup output.
+* Fix: WPML [wpml-string] shortcode translations falling back to the default language on the frontend after the 4.13.1 update.
+* Fix: WooCommerce star rating clipped to 4 out of 5 stars with the Legacy WooCommerce sidebar widget.
+
+2026-05-12 - version 4.13.2
+* New: Introduced `rem` unit support for line-height and letter-spacing in the Typography customizer controls for better accessibility — `rem` values scale with the user's browser font size preference, unlike fixed `px` values.
+* New: Added WP-CLI commands for managing the Abilities API — list, enable, disable, and inspect individual abilities directly from the command line.
+* Improvement: Off-Canvas close icon no longer shrinks when a scrollbar appears, or popup padding is applied.
+* Fix: Sticky header menu toggle desync — main header burger icon showing close (X) state after sticky header releases.
+* Fix: Multi-selector control clipping long post type labels and rendering HTML entities as literal text.
+* Fix: Customizer white screen on WordPress 6.8+ caused by an unused wp-block-editor script dependency on the customizer controls bundle.
+* Fix: Padding bleed on list and quote blocks in the Separate Container layout in the Block Editor.
+* Fix: Duplicate H1 tags when using the `astra_show_site_title_h1_tag` filter with Header Builder active.
+
 2026-04-27 - version 4.13.1
 * Fix: Mini-cart not refreshing after add-to-cart on WooCommerce "Hand-picked Products" and "Products by Category" blocks.
 * Fix: Customizer strings reverting to admin language on the frontend when using different languages for Admin and Frontend with WPML.
