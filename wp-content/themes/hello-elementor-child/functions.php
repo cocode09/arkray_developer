@@ -4216,6 +4216,235 @@ function arkray_get_events_gallery_page_url( $tab = '' ) {
 }
 
 /**
+ * Whether the current request is the Media Gallery tab of Events & Gallery.
+ *
+ * Matches the canonical /events_gallery/gallery/ route (and its legacy
+ * /events_gallery/media-gallery/ spelling) but not Gallery detail URLs
+ * nested beneath it, which are served by single-gallery.php.
+ *
+ * @return bool
+ */
+function arkray_is_media_gallery_request() {
+	if ( is_admin() ) {
+		return false;
+	}
+
+	$request_relative_path = trim( arkray_get_request_relative_path(), '/' );
+
+	return (bool) preg_match( '#(?:^|/)events_gallery/(?:gallery|media-gallery)/?$#', $request_relative_path );
+}
+
+/** Slug of the Media Gallery page in the Pages list. */
+define( 'ARKRAY_MEDIA_GALLERY_PAGE_SLUG', 'media-gallery' );
+
+/** Page template used by the Media Gallery page. */
+define( 'ARKRAY_MEDIA_GALLERY_PAGE_TEMPLATE', 'template-media-gallery.php' );
+
+/**
+ * Whether a page is the Media Gallery page.
+ *
+ * @param int|WP_Post $page Page ID or object.
+ * @return bool
+ */
+function arkray_is_media_gallery_page( $page ) {
+	$page = get_post( $page );
+	if ( ! ( $page instanceof WP_Post ) || 'page' !== $page->post_type ) {
+		return false;
+	}
+
+	if ( ARKRAY_MEDIA_GALLERY_PAGE_TEMPLATE === get_page_template_slug( $page->ID ) ) {
+		return true;
+	}
+
+	return ARKRAY_MEDIA_GALLERY_PAGE_SLUG === $page->post_name;
+}
+
+/**
+ * Emit the canonical /events_gallery/gallery/ permalink for the Media Gallery page.
+ *
+ * The page exists so editors can manage it under Pages alongside News & Topics
+ * and Products, but its public URL stays on the Events & Gallery route.
+ *
+ * @param string $permalink Page permalink.
+ * @param int    $post_id   Page ID.
+ * @return string
+ */
+function arkray_media_gallery_page_link( $permalink, $post_id ) {
+	if ( ! arkray_is_media_gallery_page( $post_id ) ) {
+		return $permalink;
+	}
+
+	return arkray_home_url( '/events_gallery/gallery/' );
+}
+add_filter( 'page_link', 'arkray_media_gallery_page_link', 20, 2 );
+
+/**
+ * Redirect the Media Gallery page's own slug to its canonical route so the
+ * tab is never reachable at two different URLs.
+ */
+function arkray_redirect_media_gallery_page_permalink() {
+	if ( is_admin() ) {
+		return;
+	}
+
+	$request_relative_path = trim( arkray_get_request_relative_path(), '/' );
+	if ( ! preg_match( '#(?:^|/)media-gallery/?$#', $request_relative_path ) ) {
+		return;
+	}
+
+	// /events_gallery/media-gallery/ is normalized by the tab route itself.
+	if ( arkray_is_media_gallery_request() ) {
+		return;
+	}
+
+	wp_safe_redirect( arkray_home_url( '/events_gallery/gallery/' ), 301 );
+	exit;
+}
+add_action( 'template_redirect', 'arkray_redirect_media_gallery_page_permalink', -13 );
+
+/**
+ * Locate the Media Gallery page by slug, including drafts.
+ *
+ * get_page_by_path() only matches published pages, so a draft left behind by an
+ * earlier attempt would otherwise cause a duplicate `media-gallery-2` page.
+ *
+ * @return WP_Post|null
+ */
+function arkray_find_media_gallery_page() {
+	$page = get_page_by_path( ARKRAY_MEDIA_GALLERY_PAGE_SLUG, OBJECT, 'page' );
+	if ( $page instanceof WP_Post ) {
+		return $page;
+	}
+
+	global $wpdb;
+	$page_id = $wpdb->get_var(
+		$wpdb->prepare(
+			"SELECT ID FROM {$wpdb->posts} WHERE post_name = %s AND post_type = 'page' AND post_status != 'trash' LIMIT 1",
+			ARKRAY_MEDIA_GALLERY_PAGE_SLUG
+		)
+	);
+
+	return $page_id ? get_post( (int) $page_id ) : null;
+}
+
+/**
+ * Create or repair the Media Gallery page and link it across languages.
+ *
+ * Idempotent: an existing page (including a draft) is published and re-pointed
+ * at the Media Gallery template rather than duplicated.
+ *
+ * @return int|WP_Error Page ID on success.
+ */
+function arkray_provision_media_gallery_page() {
+	$existing = arkray_find_media_gallery_page();
+
+	if ( $existing instanceof WP_Post ) {
+		$page_id = (int) $existing->ID;
+
+		if ( 'publish' !== $existing->post_status ) {
+			wp_update_post(
+				array(
+					'ID'          => $page_id,
+					'post_status' => 'publish',
+				)
+			);
+		}
+	} else {
+		$page_id = wp_insert_post(
+			array(
+				'post_type'    => 'page',
+				'post_status'  => 'publish',
+				'post_title'   => 'Media Gallery',
+				'post_name'    => ARKRAY_MEDIA_GALLERY_PAGE_SLUG,
+				'post_content' => '',
+			),
+			true
+		);
+
+		if ( is_wp_error( $page_id ) ) {
+			return $page_id;
+		}
+	}
+
+	if ( ARKRAY_MEDIA_GALLERY_PAGE_TEMPLATE !== get_page_template_slug( $page_id ) ) {
+		update_post_meta( $page_id, '_wp_page_template', ARKRAY_MEDIA_GALLERY_PAGE_TEMPLATE );
+	}
+
+	arkray_link_page_to_all_languages( (int) $page_id );
+
+	return (int) $page_id;
+}
+
+/**
+ * Create the Media Gallery page once so the section is manageable under Pages
+ * alongside News & Topics and Products.
+ *
+ * Runs a single time; the option guard means an intentionally deleted page is
+ * not resurrected. Re-run by deleting the `arkray_media_gallery_page_created`
+ * option, or use tools/migrate-media-gallery-page.php.
+ */
+function arkray_ensure_media_gallery_page_once() {
+	if ( get_option( 'arkray_media_gallery_page_created' ) ) {
+		return;
+	}
+
+	if ( ! is_admin() || ! current_user_can( 'manage_options' ) ) {
+		return;
+	}
+
+	if ( is_wp_error( arkray_provision_media_gallery_page() ) ) {
+		return;
+	}
+
+	update_option( 'arkray_media_gallery_page_created', 1 );
+}
+add_action( 'admin_init', 'arkray_ensure_media_gallery_page_once' );
+
+/**
+ * Assign a page to the default language and share it across every Polylang
+ * language, so a single page resolves from all language prefixes.
+ *
+ * @param int $page_id Page ID.
+ * @return void
+ */
+function arkray_link_page_to_all_languages( $page_id ) {
+	if ( ! function_exists( 'pll_set_post_language' ) || ! function_exists( 'pll_save_post_translations' ) ) {
+		return;
+	}
+
+	$languages = function_exists( 'pll_languages_list' )
+		? (array) pll_languages_list( array( 'fields' => 'slug' ) )
+		: array();
+
+	if ( empty( $languages ) ) {
+		return;
+	}
+
+	// Leave existing translation groups alone — an editor may have created
+	// separate per-language pages since this page was provisioned.
+	if ( function_exists( 'pll_get_post_translations' ) ) {
+		$translated = array_filter( (array) pll_get_post_translations( $page_id ) );
+		if ( count( array_unique( $translated ) ) > 1 ) {
+			return;
+		}
+	}
+
+	$default_language = function_exists( 'pll_default_language' ) ? pll_default_language() : '';
+	if ( '' === $default_language || ! in_array( $default_language, $languages, true ) ) {
+		$default_language = reset( $languages );
+	}
+
+	pll_set_post_language( $page_id, $default_language );
+
+	$translations = array();
+	foreach ( $languages as $language ) {
+		$translations[ $language ] = $page_id;
+	}
+
+	pll_save_post_translations( $translations );
+}
+
+/**
  * Redirect the legacy Media Gallery query-string URL to its clean route.
  */
 function arkray_redirect_legacy_media_gallery_tab_url() {
@@ -4445,7 +4674,15 @@ function arkray_prevent_events_gallery_virtual_404( $preempt, $wp_query ) {
 	$wp_query->is_single           = false;
 	$wp_query->is_archive          = false;
 	$wp_query->is_post_type_archive = false;
-	arkray_apply_virtual_page_context( $wp_query, array( 'events_gallery', 'events-gallery', 'about-us', 'sustainability' ) );
+
+	$preferred_slugs = array( 'events_gallery', 'events-gallery', 'about-us', 'sustainability' );
+	if ( arkray_is_media_gallery_request() ) {
+		// Prefer the Media Gallery page so its own title, SEO metadata and
+		// custom fields apply to /events_gallery/gallery/.
+		array_unshift( $preferred_slugs, ARKRAY_MEDIA_GALLERY_PAGE_SLUG );
+	}
+
+	arkray_apply_virtual_page_context( $wp_query, $preferred_slugs );
 
 	return true;
 }
@@ -4464,6 +4701,13 @@ function arkray_route_virtual_events_gallery_template( $template ) {
 
 	if ( '' === arkray_get_events_gallery_route_key_from_request() ) {
 		return $template;
+	}
+
+	if ( arkray_is_media_gallery_request() ) {
+		$media_gallery_template = get_stylesheet_directory() . '/' . ARKRAY_MEDIA_GALLERY_PAGE_TEMPLATE;
+		if ( file_exists( $media_gallery_template ) ) {
+			return $media_gallery_template;
+		}
 	}
 
 	$events_template = get_stylesheet_directory() . '/template-events-gallery.php';

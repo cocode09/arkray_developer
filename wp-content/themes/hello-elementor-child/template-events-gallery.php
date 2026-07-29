@@ -39,8 +39,10 @@ if ( ! isset( $events_gallery_pages[ $slug ] ) ) {
 
 $current_page = $events_gallery_pages[ $slug ];
 $current_tab  = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : 'events';
-$events_gallery_request_path = trim( arkray_get_request_relative_path(), '/' );
-if ( preg_match( '#(?:^|/)events_gallery/(?:gallery|media-gallery)/?$#', $events_gallery_request_path ) ) {
+if ( ! empty( $arkray_force_events_gallery_tab ) ) {
+	// Set by template-media-gallery.php when rendered as a page template.
+	$current_tab = sanitize_key( $arkray_force_events_gallery_tab );
+} elseif ( arkray_is_media_gallery_request() ) {
 	$current_tab = 'gallery';
 }
 if ( ! in_array( $current_tab, array( 'events', 'gallery' ), true ) ) {
