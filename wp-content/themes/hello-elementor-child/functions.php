@@ -6283,7 +6283,7 @@ function arkray_product_subdir_map() {
 		'pu-4010'               => 'urine_chemistry',
 		'ax-4060'               => 'urine_chemistry',
 		'ae-4070'               => 'urine_chemistry',
-		'aution_eye_ai-4510'    => 'urine_sediment',
+		'ai-4510'               => 'urine_sediment',
 	);
 }
 
