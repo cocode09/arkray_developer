@@ -232,7 +232,7 @@ $bnr03_src     = $theme_dir_uri . '/img/arkray4u_banner.jpg';
 				<?php
 				$category_images = array(
 					'diabetes'   => arkray_get_arkray_asset_url( 'xn-l-analyzer.png' ),
-					'urinalysis' => arkray_get_arkray_asset_url( 'ax-4030-home.png' ),
+					'urinalysis' => arkray_get_arkray_asset_url( 'ax-4060-home.png' ),
 				);
 
 				$product_categories = get_terms( array(
