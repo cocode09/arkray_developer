@@ -19,6 +19,29 @@ class Arkray_TI_Admin {
 	const MAX_UPLOAD_MB  = 32;
 
 	/**
+	 * Header row of the export.
+	 *
+	 * The page a row belongs to is carried by the ID and by the path in front of
+	 * the colon in the note column, so no separate post column is needed.
+	 */
+	const COLUMNS = array(
+		'ID',
+		'Parent ID',
+		'種別',
+		'タイトル/箇所',
+		'Global/Local',
+		'NEW',
+		'国コード',
+		'English（英語テキスト）',
+		'Vietnamese（ベトナム語テキスト）',
+		'English img（英語画像ファイル名）',
+		'Vietnamese img（ベトナム語画像ファイル名）',
+		'English caption（英語キャプション）',
+		'Vietnamese caption（ベトナム語キャプション）',
+		'箇所・メモ',
+	);
+
+	/**
 	 * Hook everything up.
 	 *
 	 * @return void
@@ -36,8 +59,8 @@ class Arkray_TI_Admin {
 	 */
 	public static function register_page() {
 		add_management_page(
-			__( 'Translation Import/Export (CSV)', 'arkray-translation-importer' ),
-			__( 'Translation CSV', 'arkray-translation-importer' ),
+			__( 'Translation Import/Export (Excel)', 'arkray-translation-importer' ),
+			__( 'Translations', 'arkray-translation-importer' ),
 			self::CAPABILITY,
 			ARKRAY_TI_PAGE_SLUG,
 			array( __CLASS__, 'render_page' )
@@ -122,6 +145,10 @@ class Arkray_TI_Admin {
 			wp_die( esc_html__( 'Polylang is not active.', 'arkray-translation-importer' ) );
 		}
 
+		if ( ! Arkray_TI_Blocks::is_supported() ) {
+			wp_die( esc_html__( 'This tool needs WordPress 6.7 or newer.', 'arkray-translation-importer' ) );
+		}
+
 		$source = self::sanitize_language( isset( $_POST['source_lang'] ) ? $_POST['source_lang'] : '' );
 		$target = self::sanitize_language( isset( $_POST['target_lang'] ) ? $_POST['target_lang'] : '' );
 		if ( '' === $source ) {
@@ -141,14 +168,8 @@ class Arkray_TI_Admin {
 		@set_time_limit( 300 );
 		wp_raise_memory_limit( 'admin' );
 
-		$headers = array(
-			'id',
-			'slug',
-			'english_content',
-			'vietnamese_content',
-		);
-
-		$rows = array();
+		$rows     = array();
+		$prefixes = array();
 
 		foreach ( $post_types as $post_type ) {
 			$posts = get_posts(
@@ -164,23 +185,361 @@ class Arkray_TI_Admin {
 			);
 
 			foreach ( $posts as $post ) {
-				$translation_id = (int) pll_get_post( $post->ID, $target );
-				$translation    = $translation_id ? get_post( $translation_id ) : null;
-
-				$rows[] = array(
-					$post->ID,
-					is_post_type_hierarchical( $post_type ) ? get_page_uri( $post ) : $post->post_name,
-					$post->post_content,
-					$translation instanceof WP_Post ? $translation->post_content : '',
-				);
+				$slug = is_post_type_hierarchical( $post_type ) ? get_page_uri( $post ) : $post->post_name;
+				foreach ( self::export_rows_for_post( $post, $slug, $target, $prefixes ) as $row ) {
+					$rows[] = $row;
+				}
 			}
 		}
 
-		Arkray_TI_Csv::stream(
-			sprintf( 'arkray-translations-%s-%s.csv', $target, gmdate( 'Ymd-His' ) ),
-			$headers,
-			$rows
+		array_unshift(
+			$rows,
+			array(
+				'cells' => self::COLUMNS,
+				'style' => 'header',
+			)
 		);
+
+		Arkray_TI_Xlsx::stream(
+			sprintf( 'arkray-translations-%s-%s.xlsx', $target, gmdate( 'Ymd-His' ) ),
+			array(
+				array(
+					'name'   => 'CSV_MAIN',
+					'freeze' => true,
+					'widths' => array( 24, 22, 10, 28, 12, 7, 10, 50, 50, 26, 26, 26, 26, 34 ),
+					'rows'   => $rows,
+				),
+				self::legend_sheet(),
+			)
+		);
+	}
+
+	/**
+	 * Build the CSV rows for one post: a separator, the title, then one row per
+	 * paragraph, heading, list item, table cell and image of its content.
+	 *
+	 * The Vietnamese columns are prefilled from the existing translation while it
+	 * still has the same blocks as the original, so the text can be reviewed.
+	 *
+	 * @param WP_Post $post     Original post.
+	 * @param string  $slug     Slug or page path of the original.
+	 * @param string  $target   Target language slug.
+	 * @param array   $prefixes ID prefixes already handed out, by reference.
+	 * @return array[] Rows as array( 'cells' => values matching self::COLUMNS, 'style' => name ).
+	 */
+	private static function export_rows_for_post( WP_Post $post, $slug, $target, array &$prefixes ) {
+		$prefix = self::block_prefix( $slug, $post->ID, $prefixes );
+		$blocks = Arkray_TI_Blocks::extract( $post->post_content );
+		$fields = self::page_fields( $post );
+		$base   = self::row_style( $post );
+
+		$translation_id = (int) pll_get_post( $post->ID, $target );
+		$translation    = $translation_id ? get_post( $translation_id ) : null;
+		$current        = $translation instanceof WP_Post
+			? Arkray_TI_Blocks::extract( $translation->post_content )
+			: array();
+
+		// The two versions only line up while they are built the same way.
+		if ( Arkray_TI_Blocks::keys( $current ) !== Arkray_TI_Blocks::keys( $blocks ) ) {
+			$current = array();
+		}
+		$current = Arkray_TI_Blocks::by_key( $current );
+
+		$title_id = $prefix . '-title';
+		$rows     = array();
+
+		// A separator row, so a page is easy to find when scrolling the file.
+		$separator    = array_fill( 0, count( self::COLUMNS ), '' );
+		$separator[3] = '【' . $post->post_title . '】';
+		$rows[]       = array(
+			'cells' => $separator,
+			'style' => 'separator',
+		);
+
+		$rows[] = array(
+			'cells' => self::export_row(
+				array(
+					'id'         => $title_id,
+					'type'       => $post->post_type,
+					'label'      => 'page' === $post->post_type
+						? __( 'Page title', 'arkray-translation-importer' )
+						: __( 'Post title', 'arkray-translation-importer' ),
+					'english'    => $post->post_title,
+					'vietnamese' => $translation instanceof WP_Post ? $translation->post_title : '',
+					'note'       => $slug . ': ' . __( 'title', 'arkray-translation-importer' ),
+				),
+				$fields
+			),
+			'style' => $base,
+		);
+
+		foreach ( $blocks as $block ) {
+			$existing = isset( $current[ $block['key'] ] ) ? $current[ $block['key'] ] : null;
+
+			$row = array(
+				'id'        => $prefix . '-' . $block['key'],
+				'parent_id' => $title_id,
+				'type'      => $post->post_type,
+				'label'     => $block['label'],
+				'note'      => $slug . ': ' . $block['label'],
+			);
+
+			if ( 'image' === $block['kind'] ) {
+				$row['english_img']        = $block['file'];
+				$row['vietnamese_img']     = $existing ? $existing['file'] : '';
+				$row['english_caption']    = $block['caption'];
+				$row['vietnamese_caption'] = $existing ? $existing['caption'] : '';
+			} else {
+				$row['english']    = $block['text'];
+				$row['vietnamese'] = $existing ? $existing['text'] : '';
+			}
+
+			$rows[] = array(
+				'cells' => self::export_row( $row, $fields ),
+				'style' => self::block_style( $block, $base ),
+			);
+		}
+
+		return $rows;
+	}
+
+	/**
+	 * Background colour for every row of a post, see the legend sheet.
+	 *
+	 * @param WP_Post $post Original post.
+	 * @return string Style name of Arkray_TI_Xlsx.
+	 */
+	private static function row_style( WP_Post $post ) {
+		if ( '' !== (string) get_post_meta( $post->ID, 'external_content_url', true ) ) {
+			return 'external';
+		}
+
+		$map = Arkray_TI_Importer::post_type_fields();
+
+		return isset( $map[ $post->post_type ] ) ? 'highlight' : 'default';
+	}
+
+	/**
+	 * Background colour for one block row: images and table cells get their own.
+	 *
+	 * @param array  $block Block from Arkray_TI_Blocks::extract().
+	 * @param string $base  Style of the post the block belongs to.
+	 * @return string Style name of Arkray_TI_Xlsx.
+	 */
+	private static function block_style( array $block, $base ) {
+		if ( 'image' === $block['kind'] || 0 === strpos( $block['key'], 'cap' ) ) {
+			return 'image';
+		}
+		if ( 0 === strpos( $block['key'], 'tbl' ) ) {
+			return 'table';
+		}
+
+		return $base;
+	}
+
+	/**
+	 * Lay one row out in the column order of the export.
+	 *
+	 * @param array $values Row values keyed by role.
+	 * @param array $fields Page level fields: scope, is_new, country.
+	 * @return array
+	 */
+	private static function export_row( array $values, array $fields ) {
+		$values = wp_parse_args(
+			$values,
+			array(
+				'id'                 => '',
+				'parent_id'          => '',
+				'type'               => '',
+				'label'              => '',
+				'english'            => '',
+				'vietnamese'         => '',
+				'english_img'        => '',
+				'vietnamese_img'     => '',
+				'english_caption'    => '',
+				'vietnamese_caption' => '',
+				'note'               => '',
+			)
+		);
+
+		return array(
+			$values['id'],
+			$values['parent_id'],
+			$values['type'],
+			$values['label'],
+			$fields['scope'],
+			$fields['is_new'],
+			$fields['country'],
+			$values['english'],
+			$values['vietnamese'],
+			$values['english_img'],
+			$values['vietnamese_img'],
+			$values['english_caption'],
+			$values['vietnamese_caption'],
+			$values['note'],
+		);
+	}
+
+	/**
+	 * The second sheet of the workbook: what each column and colour means.
+	 *
+	 * Kept in Japanese, like the sample sheet this format was agreed on, because
+	 * it is read by the people who hand the file to the translators.
+	 *
+	 * @return array Sheet definition for Arkray_TI_Xlsx.
+	 */
+	private static function legend_sheet() {
+		$rows = array(
+			array(
+				'cells' => array( 'arkray.vn 多言語ファイル 凡例・ルール' ),
+				'style' => 'header',
+			),
+			array(),
+			array(
+				'cells' => array( '【列の説明】' ),
+				'style' => 'separator',
+			),
+			array(
+				'cells' => array( '列名', '内容', '記入例', 'ルール' ),
+				'style' => 'header',
+			),
+			array( 'ID', 'ブロックごとの一意のID（ページ＋位置）', 'ha-8190v-tbl1-r2-c1', '書き換え不可。インポート時の位置の判別に使用します。' ),
+			array( 'Parent ID', '親ブロックのID（階層構造）', 'ha-8190v-title', '同じページのタイトル行を親として出力します。' ),
+			array( '種別', 'WordPressの投稿タイプ', 'page / news / event / product', '参照用。' ),
+			array( 'タイトル/箇所', 'そのブロックがページ内のどこかを示すメモ', 'Table 1, row 2, column 1', '参照用。翻訳対象ではありません。' ),
+			array( 'Global/Local', 'News・Eventsの分類', 'global / local', 'News・Eventsのみ。空欄の場合は現状を維持します。' ),
+			array( 'NEW', '新着フラグ', 'new', '「new」で表示、「0」で非表示、空欄は現状維持。' ),
+			array( '国コード', 'Events開催国（国旗表示用）', 'VN / JP / IT', 'Eventsのみ。空欄は現状維持。' ),
+			array( 'English（英語テキスト）', '英語の本文（HTMLタグなし）', 'Trade Name', '参照用。インポート時は使用しません。' ),
+			array( 'Vietnamese（ベトナム語テキスト）', 'ベトナム語の翻訳', 'Tên giao dịch', '翻訳者が記入。空欄の場合は現在の翻訳を維持します。' ),
+			array( 'English img（英語画像ファイル名）', '英語版の画像ファイル名', 'ha-8190v.jpg', '参照用。' ),
+			array( 'Vietnamese img（ベトナム語画像ファイル名）', 'ベトナム語版の画像ファイル名', 'ha-8190v-vn.jpg', 'ファイル名を書き換えると画像を差し替えます。事前にメディアライブラリへ登録してください。' ),
+			array( 'English caption（英語キャプション）', '英語のキャプション・代替テキスト', 'HA-8190V', '参照用。' ),
+			array( 'Vietnamese caption（ベトナム語キャプション）', 'ベトナム語のキャプション・代替テキスト', 'Máy phân tích HA-8190V', '翻訳者が記入。alt属性として保存します。' ),
+			array( '箇所・メモ', 'ページのパスとブロックの位置', 'about/profile: Table 1, row 1, column 1', 'コロンより前をページの判別に使用します。書き換え不可。' ),
+			array(),
+			array(
+				'cells' => array( '【背景色の意味】' ),
+				'style' => 'separator',
+			),
+			array(
+				'cells' => array( '濃紺背景', 'ヘッダー行' ),
+				'style' => 'header',
+			),
+			array(
+				'cells' => array( '濃灰背景', 'ページの区切り行（IDが空欄。インポート時は無視されます）' ),
+				'style' => 'separator',
+			),
+			array(
+				'cells' => array( '薄青背景', '画像・キャプションの行' ),
+				'style' => 'image',
+			),
+			array(
+				'cells' => array( '薄黄背景', 'テーブルのセルの行（1セル＝1ID）' ),
+				'style' => 'table',
+			),
+			array(
+				'cells' => array( '薄オレンジ背景', 'News・Eventsの行' ),
+				'style' => 'highlight',
+			),
+			array(
+				'cells' => array( '薄緑背景', '本文を外部から取得しているページの行（API連携）' ),
+				'style' => 'external',
+			),
+			array(),
+			array(
+				'cells' => array( '【ルール】' ),
+				'style' => 'separator',
+			),
+			array( '①', '1ページ内の段落・見出し・リスト・テーブルのセル・画像は、すべて別のIDで別の行に出力されます。' ),
+			array( '②', '行の追加・削除・並べ替え、およびIDの書き換えは行わないでください。' ),
+			array( '③', 'テーブルは1セルが1行（1ID）です。IDにテーブル番号・行番号・列番号が入ります。' ),
+			array( '④', '訳文はHTMLタグなしで記入してください。タグは元のページのものをそのまま使用します。' ),
+			array( '⑤', 'Vietnamese imgのファイル名を書き換えると、その画像を差し替えます。' ),
+			array( '⑥', 'すべてのセルは書式「文字列」で出力しています。先頭が「-」「+」「=」の文字列もそのまま扱われます。' ),
+			array( '⑦', '英語版のページを更新した場合は、IDが変わることがあるため再度エクスポートしてください。' ),
+			array( '⑧', 'このファイルは.xlsxのままアップロードできます。CSVに変換する必要はありません。' ),
+		);
+
+		return array(
+			'name'   => '凡例・ルール',
+			'widths' => array( 34, 58, 38, 52 ),
+			'rows'   => $rows,
+		);
+	}
+
+	/**
+	 * The part every block ID of a post starts with, taken from its slug.
+	 *
+	 * @param string $slug     Slug or page path.
+	 * @param int    $post_id  Post ID, used to keep the prefix unique.
+	 * @param array  $prefixes Prefixes already handed out, by reference.
+	 * @return string
+	 */
+	private static function block_prefix( $slug, $post_id, array &$prefixes ) {
+		$base = '' !== (string) $slug ? basename( (string) $slug ) : '';
+		$base = strtolower( remove_accents( $base ) );
+		$base = preg_replace( '#[^a-z0-9]+#', '-', $base );
+		$base = trim( (string) $base, '-' );
+
+		if ( '' === $base ) {
+			$base = 'post-' . (int) $post_id;
+		}
+		if ( isset( $prefixes[ $base ] ) ) {
+			$base .= '-' . (int) $post_id;
+		}
+
+		$prefixes[ $base ] = true;
+
+		return $base;
+	}
+
+	/**
+	 * Read the Global/Local, NEW and country columns off a post.
+	 *
+	 * @param WP_Post $post Original post.
+	 * @return array scope, is_new, country.
+	 */
+	private static function page_fields( WP_Post $post ) {
+		$values = array(
+			'scope'   => '',
+			'is_new'  => '',
+			'country' => '',
+		);
+
+		$map = Arkray_TI_Importer::post_type_fields();
+		if ( ! isset( $map[ $post->post_type ] ) ) {
+			return $values;
+		}
+
+		$fields = wp_parse_args(
+			$map[ $post->post_type ],
+			array(
+				'taxonomy'     => '',
+				'new_meta'     => '',
+				'country_meta' => '',
+			)
+		);
+
+		if ( '' !== $fields['taxonomy'] ) {
+			$terms = get_the_terms( $post->ID, $fields['taxonomy'] );
+			if ( is_array( $terms ) && ! empty( $terms ) ) {
+				$values['scope'] = $terms[0]->slug;
+			}
+		}
+
+		if ( '' !== $fields['new_meta'] ) {
+			$is_new = get_post_meta( $post->ID, $fields['new_meta'], true );
+			if ( '' !== $is_new && null !== $is_new ) {
+				$values['is_new'] = $is_new ? 'new' : '';
+			}
+		}
+
+		if ( '' !== $fields['country_meta'] ) {
+			$values['country'] = (string) get_post_meta( $post->ID, $fields['country_meta'], true );
+		}
+
+		return $values;
 	}
 
 	// ─────────────────────────────────────────────────────────────────────────
@@ -202,15 +561,21 @@ class Arkray_TI_Admin {
 			wp_die( esc_html__( 'Polylang is not active.', 'arkray-translation-importer' ) );
 		}
 
+		if ( ! Arkray_TI_Blocks::is_supported() ) {
+			wp_die( esc_html__( 'This tool needs WordPress 6.7 or newer.', 'arkray-translation-importer' ) );
+		}
+
 		$mode    = isset( $_POST['import_mode'] ) ? sanitize_key( $_POST['import_mode'] ) : 'dry_run';
 		$dry_run = 'import' !== $mode;
 
-		$error = self::validate_upload();
-		if ( is_wp_error( $error ) ) {
-			self::redirect_with_results( array( 'fatal' => $error->get_error_message() ) );
+		$extension = self::validate_upload();
+		if ( is_wp_error( $extension ) ) {
+			self::redirect_with_results( array( 'fatal' => $extension->get_error_message() ) );
 		}
 
-		$parsed = Arkray_TI_Csv::read( $_FILES['csv_file']['tmp_name'] );
+		$parsed = 'xlsx' === $extension
+			? Arkray_TI_Xlsx::read( $_FILES['translation_file']['tmp_name'] )
+			: Arkray_TI_Csv::read( $_FILES['translation_file']['tmp_name'] );
 		if ( is_wp_error( $parsed ) ) {
 			self::redirect_with_results( array( 'fatal' => $parsed->get_error_message() ) );
 		}
@@ -237,11 +602,11 @@ class Arkray_TI_Admin {
 		wp_raise_memory_limit( 'admin' );
 
 		$importer = new Arkray_TI_Importer( $target, $source, $options );
-		$report   = $importer->run( $parsed['rows'], $dry_run );
+		$report   = $importer->run( $parsed['rows'], $dry_run, $parsed['headers'] );
 
 		$report['dry_run']         = $dry_run;
 		$report['target_lang']     = $target;
-		$report['ignored_columns'] = Arkray_TI_Importer::ignored_columns( $parsed['headers'] );
+		$report['ignored_columns'] = Arkray_TI_Importer::ignored_columns( $parsed['headers'], $report['format'] );
 
 		self::redirect_with_results( $report );
 	}
@@ -249,32 +614,39 @@ class Arkray_TI_Admin {
 	/**
 	 * Validate the uploaded file.
 	 *
-	 * @return true|WP_Error
+	 * @return string|WP_Error The file extension, lower-cased.
 	 */
 	private static function validate_upload() {
-		if ( empty( $_FILES['csv_file'] ) || ! isset( $_FILES['csv_file']['error'] ) ) {
+		if ( empty( $_FILES['translation_file'] ) || ! isset( $_FILES['translation_file']['error'] ) ) {
 			return new WP_Error( 'arkray_ti_no_file', __( 'No file was uploaded.', 'arkray-translation-importer' ) );
 		}
-		if ( UPLOAD_ERR_OK !== (int) $_FILES['csv_file']['error'] ) {
+		if ( UPLOAD_ERR_OK !== (int) $_FILES['translation_file']['error'] ) {
 			return new WP_Error( 'arkray_ti_upload_error', __( 'The upload failed. The file may exceed the server upload limit.', 'arkray-translation-importer' ) );
 		}
-		if ( ! is_uploaded_file( $_FILES['csv_file']['tmp_name'] ) ) {
+		if ( ! is_uploaded_file( $_FILES['translation_file']['tmp_name'] ) ) {
 			return new WP_Error( 'arkray_ti_upload_error', __( 'Invalid upload.', 'arkray-translation-importer' ) );
 		}
-		if ( (int) $_FILES['csv_file']['size'] > self::MAX_UPLOAD_MB * 1024 * 1024 ) {
+		if ( (int) $_FILES['translation_file']['size'] > self::MAX_UPLOAD_MB * 1024 * 1024 ) {
 			return new WP_Error(
 				'arkray_ti_too_large',
 				sprintf( __( 'The file exceeds %d MB.', 'arkray-translation-importer' ), self::MAX_UPLOAD_MB )
 			);
 		}
 
-		$name = isset( $_FILES['csv_file']['name'] ) ? (string) $_FILES['csv_file']['name'] : '';
-		$ext  = strtolower( (string) pathinfo( $name, PATHINFO_EXTENSION ) );
-		if ( ! in_array( $ext, array( 'csv', 'txt' ), true ) ) {
-			return new WP_Error( 'arkray_ti_wrong_type', __( 'Please upload a .csv file.', 'arkray-translation-importer' ) );
+		$name      = isset( $_FILES['translation_file']['name'] ) ? (string) $_FILES['translation_file']['name'] : '';
+		$extension = strtolower( (string) pathinfo( $name, PATHINFO_EXTENSION ) );
+
+		if ( in_array( $extension, array( 'xls', 'xlsm' ), true ) ) {
+			return new WP_Error(
+				'arkray_ti_wrong_type',
+				__( 'Excel 97-2003 (.xls) and macro (.xlsm) files cannot be read. Open the file in Excel and use “Save as” to store it as .xlsx.', 'arkray-translation-importer' )
+			);
+		}
+		if ( ! in_array( $extension, array( 'xlsx', 'csv', 'txt' ), true ) ) {
+			return new WP_Error( 'arkray_ti_wrong_type', __( 'Please upload the .xlsx file you downloaded, or a .csv file.', 'arkray-translation-importer' ) );
 		}
 
-		return true;
+		return $extension;
 	}
 
 	/**
@@ -304,10 +676,17 @@ class Arkray_TI_Admin {
 		}
 
 		echo '<div class="wrap">';
-		echo '<h1>' . esc_html__( 'Translation Import/Export (CSV)', 'arkray-translation-importer' ) . '</h1>';
+		echo '<h1>' . esc_html__( 'Translation Import/Export (Excel)', 'arkray-translation-importer' ) . '</h1>';
 
 		if ( ! arkray_ti_polylang_ready() ) {
 			echo '<div class="notice notice-error"><p>' . esc_html__( 'Polylang must be active to use this tool.', 'arkray-translation-importer' ) . '</p></div></div>';
+			return;
+		}
+
+		if ( ! Arkray_TI_Blocks::is_supported() ) {
+			echo '<div class="notice notice-error"><p>'
+				. esc_html__( 'This tool needs WordPress 6.7 or newer to read the text out of page content and put translations back into it.', 'arkray-translation-importer' )
+				. '</p></div></div>';
 			return;
 		}
 
@@ -374,6 +753,13 @@ class Arkray_TI_Admin {
 		);
 		echo '</p></div>';
 
+		if ( ! empty( $report['format'] ) && Arkray_TI_Importer::FORMAT_BLOCK !== $report['format'] ) {
+			$notice = Arkray_TI_Importer::FORMAT_SEGMENT === $report['format']
+				? __( 'The file has no ID column, so it was read as the older layout that addresses text by content_id.', 'arkray-translation-importer' )
+				: __( 'The file has no ID and no content_id column, so it was read as the oldest layout, where the Vietnamese cell holds the whole HTML of a page.', 'arkray-translation-importer' );
+			echo '<div class="notice notice-info"><p>' . esc_html( $notice ) . '</p></div>';
+		}
+
 		if ( ! empty( $report['ignored_columns'] ) ) {
 			echo '<div class="notice notice-info"><p>'
 				. esc_html__( 'Ignored columns (reference only):', 'arkray-translation-importer' ) . ' <code>'
@@ -400,9 +786,9 @@ class Arkray_TI_Admin {
 
 		echo '<table class="widefat striped" style="max-width:1100px;margin-bottom:24px;">';
 		echo '<thead><tr>';
-		echo '<th style="width:70px;">' . esc_html__( 'CSV line', 'arkray-translation-importer' ) . '</th>';
+		echo '<th style="width:70px;">' . esc_html__( 'Row', 'arkray-translation-importer' ) . '</th>';
 		echo '<th style="width:110px;">' . esc_html__( 'Post type', 'arkray-translation-importer' ) . '</th>';
-		echo '<th>' . esc_html__( 'Original', 'arkray-translation-importer' ) . '</th>';
+		echo '<th style="width:90px;">' . esc_html__( 'Original', 'arkray-translation-importer' ) . '</th>';
 		echo '<th style="width:130px;">' . esc_html__( 'Action', 'arkray-translation-importer' ) . '</th>';
 		echo '<th>' . esc_html__( 'Details', 'arkray-translation-importer' ) . '</th>';
 		echo '</tr></thead><tbody>';
@@ -436,11 +822,15 @@ class Arkray_TI_Admin {
 		echo '<div class="card" style="max-width:1100px;">';
 		echo '<h2>' . esc_html__( 'Workflow', 'arkray-translation-importer' ) . '</h2>';
 		echo '<ol>';
-		echo '<li>' . esc_html__( 'Export a CSV below. It has four columns: id, slug, english_content and vietnamese_content (prefilled when a translation already exists).', 'arkray-translation-importer' ) . '</li>';
-		echo '<li>' . esc_html__( 'Fill the "vietnamese_content" column with the translation of "english_content". Keep the HTML tags intact — translate only the visible text. Do not change the id or slug columns.', 'arkray-translation-importer' ) . '</li>';
-		echo '<li>' . esc_html__( 'Save the file as CSV UTF-8 (required for Vietnamese characters) and upload it below with "Dry run" first to preview, then "Import".', 'arkray-translation-importer' ) . '</li>';
+		echo '<li>' . esc_html__( 'Export the Excel file below. It contains no HTML: the title, every paragraph, heading, list item, table cell and image of a page is one row with its own ID, and a separator row marks where each page starts. A second sheet explains the columns and the row colours.', 'arkray-translation-importer' ) . '</li>';
+		echo '<li>' . esc_html__( 'Translators fill the Vietnamese column next to each English cell, and the Vietnamese caption column for images. Do not add, delete, sort or renumber rows, and leave the ID, Parent ID and 箇所・メモ columns as they are: they say where the text goes.', 'arkray-translation-importer' ) . '</li>';
+		echo '<li>' . esc_html__( 'To show a different image in Vietnamese, put its file name in the "Vietnamese img" column. The file must already be in the media library.', 'arkray-translation-importer' ) . '</li>';
+		echo '<li>' . esc_html__( 'Upload the .xlsx file as it is, with "Dry run" first to preview, then "Import". There is no need to convert it to CSV.', 'arkray-translation-importer' ) . '</li>';
 		echo '</ol>';
-		echo '<p>' . esc_html__( 'The import is safe to repeat: existing translations are updated, missing ones are created, and rows with an empty vietnamese_content cell are skipped without touching anything.', 'arkray-translation-importer' ) . '</p>';
+		echo '<p>' . esc_html__( 'Every cell of the export is formatted as text, so Excel leaves the content alone: a paragraph starting with "-" or "+" stays text instead of turning into a #NAME? formula error, and phone numbers and codes keep their leading characters.', 'arkray-translation-importer' ) . '</p>';
+		echo '<p>' . esc_html__( 'On import the HTML tags of the original page are put back around each translated text, so the translation is stored as complete HTML exactly like the original. Rows left blank keep what the current translation says, or the original text when there is no translation yet.', 'arkray-translation-importer' ) . '</p>';
+		echo '<p>' . esc_html__( 'The import is safe to repeat: existing translations are updated, missing ones are created, and pages without any translated text are skipped without touching anything.', 'arkray-translation-importer' ) . '</p>';
+		echo '<p>' . esc_html__( 'Export again whenever the English content changed: an ID says which paragraph, cell or image it belongs to, so an outdated file can leave text in the wrong place or be reported as unknown.', 'arkray-translation-importer' ) . '</p>';
 		echo '</div>';
 	}
 
@@ -456,7 +846,7 @@ class Arkray_TI_Admin {
 		$post_types     = self::translated_post_types();
 
 		echo '<div class="card" style="max-width:1100px;">';
-		echo '<h2>' . esc_html__( '1. Export CSV for translation', 'arkray-translation-importer' ) . '</h2>';
+		echo '<h2>' . esc_html__( '1. Export the Excel file for translation', 'arkray-translation-importer' ) . '</h2>';
 		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
 		echo '<input type="hidden" name="action" value="arkray_ti_export" />';
 		wp_nonce_field( self::NONCE_ACTION );
@@ -488,11 +878,11 @@ class Arkray_TI_Admin {
 			echo '<option value="' . esc_attr( $slug ) . '"' . selected( $slug, $default_target, false ) . '>' . esc_html( $label ) . '</option>';
 		}
 		echo '</select>';
-		echo '<p class="description">' . esc_html__( 'When a translation already exists, its current content is prefilled in the vietnamese_content column so you can review and correct it.', 'arkray-translation-importer' ) . '</p>';
+		echo '<p class="description">' . esc_html__( 'When a translation already exists, its text, image file names and captions are prefilled in the Vietnamese columns so they can be reviewed and corrected.', 'arkray-translation-importer' ) . '</p>';
 		echo '</td></tr>';
 
 		echo '</tbody></table>';
-		submit_button( __( 'Download CSV', 'arkray-translation-importer' ), 'secondary' );
+		submit_button( __( 'Download Excel file (.xlsx)', 'arkray-translation-importer' ), 'secondary' );
 		echo '</form></div>';
 	}
 
@@ -506,16 +896,16 @@ class Arkray_TI_Admin {
 		$default_target = self::default_target();
 
 		echo '<div class="card" style="max-width:1100px;">';
-		echo '<h2>' . esc_html__( '2. Upload translated CSV', 'arkray-translation-importer' ) . '</h2>';
+		echo '<h2>' . esc_html__( '2. Upload the translated file', 'arkray-translation-importer' ) . '</h2>';
 		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" enctype="multipart/form-data">';
 		echo '<input type="hidden" name="action" value="arkray_ti_import" />';
 		wp_nonce_field( self::NONCE_ACTION );
 
 		echo '<table class="form-table"><tbody>';
 
-		echo '<tr><th scope="row"><label for="arkray-ti-file">' . esc_html__( 'CSV file', 'arkray-translation-importer' ) . '</label></th><td>';
-		echo '<input type="file" id="arkray-ti-file" name="csv_file" accept=".csv,.txt,text/csv" required />';
-		echo '<p class="description">' . esc_html__( 'UTF-8 encoded (Excel: File → Save As → "CSV UTF-8"). Comma, semicolon and tab delimiters are detected automatically.', 'arkray-translation-importer' ) . '</p>';
+		echo '<tr><th scope="row"><label for="arkray-ti-file">' . esc_html__( 'Translated file', 'arkray-translation-importer' ) . '</label></th><td>';
+		echo '<input type="file" id="arkray-ti-file" name="translation_file" accept=".xlsx,.csv,.txt,' . esc_attr( Arkray_TI_Xlsx::CONTENT_TYPE ) . ',text/csv" required />';
+		echo '<p class="description">' . esc_html__( 'The .xlsx file from the export, with the translations filled in; only its first sheet is read. A CSV is still accepted, in which case it has to be UTF-8 encoded (Excel: File → Save As → "CSV UTF-8"); comma, semicolon and tab delimiters are detected automatically.', 'arkray-translation-importer' ) . '</p>';
 		echo '</td></tr>';
 
 		echo '<tr><th scope="row"><label for="arkray-ti-import-target">' . esc_html__( 'Target language', 'arkray-translation-importer' ) . '</label></th><td>';
@@ -529,7 +919,7 @@ class Arkray_TI_Admin {
 		echo '<label style="display:block;"><input type="checkbox" name="copy_template" value="1" checked /> ' . esc_html__( 'Copy the page template from the original', 'arkray-translation-importer' ) . '</label>';
 		echo '<label style="display:block;"><input type="checkbox" name="copy_thumbnail" value="1" checked /> ' . esc_html__( 'Copy the featured image from the original', 'arkray-translation-importer' ) . '</label>';
 		echo '<label style="display:block;"><input type="checkbox" name="copy_elementor" value="1" checked /> ' . esc_html__( 'Copy the Elementor layout from the original (if it uses Elementor)', 'arkray-translation-importer' ) . '</label>';
-		echo '<label style="display:block;"><input type="checkbox" name="copy_terms" value="1" checked /> ' . esc_html__( 'Assign translated categories/terms matching the original (when no tax: column is given)', 'arkray-translation-importer' ) . '</label>';
+		echo '<label style="display:block;"><input type="checkbox" name="copy_terms" value="1" checked /> ' . esc_html__( 'Assign the translated categories and terms of the original; the Global/Local column still wins over them', 'arkray-translation-importer' ) . '</label>';
 		echo '</td></tr>';
 
 		echo '</tbody></table>';
@@ -543,21 +933,32 @@ class Arkray_TI_Admin {
 	}
 
 	/**
-	 * Render the CSV column reference.
+	 * Render the column reference.
 	 *
 	 * @return void
 	 */
 	private static function render_column_reference() {
 		$columns = array(
-			'id'                 => __( 'ID of the original (English) post. The most reliable identifier — keep this column from the export.', 'arkray-translation-importer' ),
-			'slug'               => __( 'Slug of the original post, used to find it when id is empty. Pages accept a full path such as "about/philosophy". Never modified by the import.', 'arkray-translation-importer' ),
-			'english_content'    => __( 'The original content, for the translator\'s reference. Ignored on import.', 'arkray-translation-importer' ),
-			'vietnamese_content' => __( 'The translated body (HTML allowed — translate only the visible text between tags). Written to the translation; rows with an empty cell are skipped.', 'arkray-translation-importer' ),
+			'ID'                 => __( 'Unique key of the block, made of the page slug and the position, e.g. "ha-8190v-tbl1-r2-c1". It tells the import which page and which part of it the text belongs to, so leave it exactly as exported.', 'arkray-translation-importer' ),
+			'Parent ID'          => __( 'The block this row sits under: every row of a page points at the title row. Used to read the file as a tree.', 'arkray-translation-importer' ),
+			'種別'                => __( 'Post type of the page (page, post, news, event, product…). Reference only.', 'arkray-translation-importer' ),
+			'タイトル/箇所'        => __( 'What the block is, e.g. "Heading 2 (H3)" or "Table 1, row 2, column 1". Reference only.', 'arkray-translation-importer' ),
+			'Global/Local'       => __( 'Term of news_category or event_type. Written to the translation together with the translated text; blank leaves it as it is.', 'arkray-translation-importer' ),
+			'NEW'                => __( 'New-arrival flag of a news post or event. "new" switches the badge on, "0" switches it off, blank leaves it as it is.', 'arkray-translation-importer' ),
+			'国コード'            => __( 'Country of an event, used for its flag (ISO code, country name or flag emoji). Blank leaves it as it is.', 'arkray-translation-importer' ),
+			'English'            => __( 'The original text of that block, without HTML tags. For the translator\'s reference; ignored on import.', 'arkray-translation-importer' ),
+			'Vietnamese'         => __( 'The translated text, without HTML tags. Blank cells keep the text that is there today. Tags typed into this cell are stored as visible text, not as markup.', 'arkray-translation-importer' ),
+			'English img'        => __( 'File name of the image in the original page. Reference only.', 'arkray-translation-importer' ),
+			'Vietnamese img'     => __( 'File name to show in the translation instead. The file must be in the media library; blank keeps the original image.', 'arkray-translation-importer' ),
+			'English caption'    => __( 'Alt text of the original image. Reference only.', 'arkray-translation-importer' ),
+			'Vietnamese caption' => __( 'Alt text for the translated image. Blank keeps the alt text that is there today.', 'arkray-translation-importer' ),
+			'箇所・メモ'          => __( 'Where the block sits, written as "page path: position". The path in front of the colon is how the import finds the page, so keep it as exported. Pages use a full path such as "about/philosophy".', 'arkray-translation-importer' ),
 		);
 
 		echo '<div class="card" style="max-width:1100px;">';
-		echo '<h2>' . esc_html__( 'CSV column reference', 'arkray-translation-importer' ) . '</h2>';
-		echo '<p>' . esc_html__( 'Column order does not matter and headers are case-insensitive (common variants such as "vietnam content" or "vi_content" are also accepted). When a translation is created, its title, date, template, featured image, Elementor layout and categories are copied from the original according to the options above.', 'arkray-translation-importer' ) . '</p>';
+		echo '<h2>' . esc_html__( 'Column reference', 'arkray-translation-importer' ) . '</h2>';
+		echo '<p>' . esc_html__( 'The same columns are read from an .xlsx and from a CSV. Column order does not matter and headers are case-insensitive; the English name alone is enough ("Vietnamese" as well as "Vietnamese（ベトナム語テキスト）"). Rows without an ID, such as the separator rows, are skipped. When a translation is created, its date, template, featured image, Elementor layout and categories are copied from the original according to the options above.', 'arkray-translation-importer' ) . '</p>';
+		echo '<p>' . esc_html__( 'A file may also carry page_id and page_slug columns naming the original post; the import then uses those instead of the ID and the note.', 'arkray-translation-importer' ) . '</p>';
 		echo '<table class="widefat striped"><thead><tr>';
 		echo '<th style="width:220px;">' . esc_html__( 'Column', 'arkray-translation-importer' ) . '</th>';
 		echo '<th>' . esc_html__( 'Meaning', 'arkray-translation-importer' ) . '</th>';
@@ -566,6 +967,18 @@ class Arkray_TI_Admin {
 			echo '<tr><td><code>' . esc_html( $column ) . '</code></td><td>' . esc_html( $description ) . '</td></tr>';
 		}
 		echo '</tbody></table>';
+
+		echo '<h3>' . esc_html__( 'How an ID is built', 'arkray-translation-importer' ) . '</h3>';
+		echo '<p>' . esc_html__( 'After the page slug comes the position of the block:', 'arkray-translation-importer' ) . '</p>';
+		echo '<ul style="list-style:disc;margin-left:20px;">';
+		echo '<li><code>title</code> — ' . esc_html__( 'the page or post title', 'arkray-translation-importer' ) . '</li>';
+		echo '<li><code>p01</code>, <code>h01</code>, <code>li01</code>, <code>cap01</code> — ' . esc_html__( 'paragraph, heading, list item, figure caption', 'arkray-translation-importer' ) . '</li>';
+		echo '<li><code>tbl1-r2-c1</code>, <code>tbl1-caption</code> — ' . esc_html__( 'one table cell (table, row, column) and the caption of a table', 'arkray-translation-importer' ) . '</li>';
+		echo '<li><code>img01</code> — ' . esc_html__( 'an image; its row carries the file name and caption instead of text', 'arkray-translation-importer' ) . '</li>';
+		echo '<li><code>p03-2</code> — ' . esc_html__( 'the second piece of paragraph 3, which happens when a link or a bold word breaks the sentence', 'arkray-translation-importer' ) . '</li>';
+		echo '</ul>';
+
+		echo '<p class="description">' . esc_html__( 'Text that lives outside the post content (page builder layouts, widgets, menus, ACF fields) and the contents of preformatted blocks are not part of this file. Files exported by earlier versions of this plugin are still read: a file with a content_id column addresses text by position, and a file with only id, slug and content columns replaces the whole HTML of a page.', 'arkray-translation-importer' ) . '</p>';
 		echo '</div>';
 	}
 }

@@ -1,8 +1,8 @@
 <?php
 /**
  * Plugin Name: ARKRAY Translation Importer
- * Description: Bulk create or update translations (e.g. Vietnamese) for pages and custom post types from a single CSV upload. Includes a CSV exporter that produces a ready-to-translate file from the existing English content. Requires Polylang.
- * Version: 1.0.0
+ * Description: Bulk create or update translations (e.g. Vietnamese) for pages and custom post types from a single spreadsheet upload. The exported Excel file holds one row per title, paragraph, table cell and image, each with its own ID, without any HTML tags and with every cell formatted as text; on import the tags of the original page are put back around the translations. Requires Polylang.
+ * Version: 1.3.0
  * Author: ARKRAY
  * Text Domain: arkray-translation-importer
  *
@@ -13,11 +13,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'ARKRAY_TI_VERSION', '1.0.0' );
+define( 'ARKRAY_TI_VERSION', '1.3.0' );
 define( 'ARKRAY_TI_DIR', plugin_dir_path( __FILE__ ) );
 define( 'ARKRAY_TI_PAGE_SLUG', 'arkray-translation-importer' );
 
+require_once ARKRAY_TI_DIR . 'includes/class-arkray-ti-blocks.php';
 require_once ARKRAY_TI_DIR . 'includes/class-arkray-ti-csv.php';
+require_once ARKRAY_TI_DIR . 'includes/class-arkray-ti-xlsx.php';
 require_once ARKRAY_TI_DIR . 'includes/class-arkray-ti-importer.php';
 require_once ARKRAY_TI_DIR . 'includes/class-arkray-ti-admin.php';
 

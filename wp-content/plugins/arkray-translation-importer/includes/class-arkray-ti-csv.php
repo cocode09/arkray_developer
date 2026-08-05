@@ -10,17 +10,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Reads uploaded CSV files (UTF-8 / UTF-16, comma / semicolon / tab delimited)
- * and streams CSV downloads that open cleanly in Excel.
+ * Reads uploaded CSV files (UTF-8 / UTF-16, comma / semicolon / tab delimited).
+ *
+ * The export is an Excel workbook, see Arkray_TI_Xlsx, but a CSV is still
+ * accepted on upload.
  */
 class Arkray_TI_Csv {
 
 	/**
 	 * Parse a CSV file into headers plus associative rows.
-	 *
-	 * Headers are lower-cased and trimmed. Rows shorter than the header are
-	 * padded with empty strings; longer rows are truncated. Fully empty rows
-	 * are skipped.
 	 *
 	 * @param string $file_path Absolute path to the CSV file.
 	 * @return array|WP_Error { 'headers' => string[], 'rows' => array[] } keyed by header.
@@ -42,43 +40,88 @@ class Arkray_TI_Csv {
 		fwrite( $handle, $raw );
 		rewind( $handle );
 
-		$headers = fgetcsv( $handle, 0, $delimiter, '"', '\\' );
-		if ( ! is_array( $headers ) || 0 === count( array_filter( $headers, 'strlen' ) ) ) {
+		$header_row = fgetcsv( $handle, 0, $delimiter, '"', '\\' );
+		if ( ! is_array( $header_row ) ) {
 			fclose( $handle );
 			return new WP_Error( 'arkray_ti_no_header', __( 'Could not read a header row from the CSV file.', 'arkray-translation-importer' ) );
 		}
 
-		$headers = array_map(
-			static function ( $header ) {
-				return strtolower( trim( (string) $header ) );
-			},
-			$headers
-		);
-
-		$count = count( $headers );
-		$rows  = array();
-
+		$data_rows = array();
 		while ( ( $data = fgetcsv( $handle, 0, $delimiter, '"', '\\' ) ) !== false ) {
-			if ( ! is_array( $data ) ) {
-				continue;
+			if ( is_array( $data ) ) {
+				$data_rows[] = $data;
 			}
-			$data = array_map(
-				static function ( $value ) {
-					return null === $value ? '' : trim( (string) $value );
-				},
-				$data
-			);
-			if ( 0 === count( array_filter( $data, 'strlen' ) ) ) {
-				continue;
-			}
-			$data = array_pad( array_slice( $data, 0, $count ), $count, '' );
-			$rows[] = array_combine( $headers, $data );
 		}
 
 		fclose( $handle );
 
+		return self::structure( $header_row, $data_rows );
+	}
+
+	/**
+	 * Turn a header row plus data rows into the shape the importer expects.
+	 *
+	 * Headers are lower-cased and trimmed, empty trailing columns are dropped and
+	 * repeated headers are numbered so no column can quietly swallow another.
+	 * Rows shorter than the header are padded, longer rows are truncated, and
+	 * fully empty rows are skipped.
+	 *
+	 * Shared by the CSV reader and by Arkray_TI_Xlsx.
+	 *
+	 * @param array   $header_row First row of the file.
+	 * @param array[] $data_rows  The rows below it.
+	 * @return array|WP_Error { 'headers' => string[], 'rows' => array[] } keyed by header.
+	 */
+	public static function structure( array $header_row, array $data_rows ) {
+		$headers = array_map(
+			static function ( $header ) {
+				return strtolower( trim( (string) $header ) );
+			},
+			array_values( $header_row )
+		);
+
+		while ( ! empty( $headers ) && '' === end( $headers ) ) {
+			array_pop( $headers );
+		}
+
+		if ( empty( $headers ) ) {
+			return new WP_Error( 'arkray_ti_no_header', __( 'The first row of the file holds no column names.', 'arkray-translation-importer' ) );
+		}
+
+		$seen = array();
+		foreach ( $headers as $index => $header ) {
+			if ( '' === $header ) {
+				$header = 'column_' . ( $index + 1 );
+			}
+			if ( isset( $seen[ $header ] ) ) {
+				++$seen[ $header ];
+				$header .= '_' . $seen[ $header ];
+			} else {
+				$seen[ $header ] = 1;
+			}
+			$headers[ $index ] = $header;
+		}
+
+		$count = count( $headers );
+		$rows  = array();
+
+		foreach ( $data_rows as $data ) {
+			$data = array_map(
+				static function ( $value ) {
+					return null === $value ? '' : trim( (string) $value );
+				},
+				array_values( (array) $data )
+			);
+
+			if ( 0 === count( array_filter( $data, 'strlen' ) ) ) {
+				continue;
+			}
+
+			$rows[] = array_combine( $headers, array_pad( array_slice( $data, 0, $count ), $count, '' ) );
+		}
+
 		if ( empty( $rows ) ) {
-			return new WP_Error( 'arkray_ti_no_rows', __( 'The CSV file contains a header row but no data rows.', 'arkray-translation-importer' ) );
+			return new WP_Error( 'arkray_ti_no_rows', __( 'The file contains a header row but no data rows.', 'arkray-translation-importer' ) );
 		}
 
 		return array(
@@ -135,27 +178,4 @@ class Arkray_TI_Csv {
 		return $best;
 	}
 
-	/**
-	 * Stream a CSV download (UTF-8 with BOM so Excel detects the encoding) and exit.
-	 *
-	 * @param string   $filename Download file name.
-	 * @param string[] $headers  Header row.
-	 * @param array[]  $rows     Rows of plain arrays matching the header order.
-	 * @return void
-	 */
-	public static function stream( $filename, array $headers, array $rows ) {
-		nocache_headers();
-		header( 'Content-Type: text/csv; charset=utf-8' );
-		header( 'Content-Disposition: attachment; filename="' . sanitize_file_name( $filename ) . '"' );
-
-		echo "\xEF\xBB\xBF";
-
-		$out = fopen( 'php://output', 'w' );
-		fputcsv( $out, $headers, ',', '"', '\\' );
-		foreach ( $rows as $row ) {
-			fputcsv( $out, $row, ',', '"', '\\' );
-		}
-		fclose( $out );
-		exit;
-	}
 }
