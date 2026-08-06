@@ -5713,8 +5713,16 @@ function arkray_get_products_page_id_for_request( $lang = '' ) {
  * @return bool True when context was applied.
  */
 function arkray_apply_product_category_query_context( $wp_query, $pcat_slug ) {
-	$page_id = arkray_get_products_page_id_for_request();
-	if ( $page_id <= 0 || '' === $pcat_slug ) {
+	if ( '' === $pcat_slug ) {
+		return false;
+	}
+
+	$origin  = arkray_wp_slug_to_origin_slug( $pcat_slug );
+	$page_id = '' !== $origin ? arkray_get_product_category_page_id_for_origin( $origin ) : 0;
+	if ( $page_id <= 0 ) {
+		$page_id = arkray_get_products_page_id_for_request();
+	}
+	if ( $page_id <= 0 ) {
 		return false;
 	}
 
@@ -6029,7 +6037,13 @@ function arkray_parse_product_category_request( $wp ) {
 	}
 
 	$term_slug = '' !== $path_slug ? $path_slug : arkray_normalize_product_category_wp_slug( $routes[ $product_slug ] );
-	$page_id   = arkray_get_products_page_id_for_request();
+	$origin    = '' !== $product_slug && isset( $routes[ $product_slug ] )
+		? $product_slug
+		: arkray_wp_slug_to_origin_slug( $term_slug );
+	$page_id   = '' !== $origin ? arkray_get_product_category_page_id_for_origin( $origin ) : 0;
+	if ( $page_id <= 0 ) {
+		$page_id = arkray_get_products_page_id_for_request();
+	}
 	if ( $page_id <= 0 ) {
 		return;
 	}
@@ -6190,6 +6204,318 @@ function arkray_origin_product_slug_map() {
 }
 
 /**
+ * Product category landing pages that should appear under Pages in wp-admin.
+ *
+ * These map the public /products/{origin}/ directories to real child pages of
+ * Products so editors can find and open them alongside other site pages.
+ *
+ * @return array<string,array{title:string,term_slug:string}>
+ */
+function arkray_product_category_admin_pages() {
+	return array(
+		'diabetes'   => array(
+			'title'     => 'Diabetes Testing',
+			'term_slug' => 'laboratory-testing',
+		),
+		'urinalysis' => array(
+			'title'     => 'Urinalysis / Urine Testing',
+			'term_slug' => 'urinalysis',
+		),
+		'osmolality' => array(
+			'title'     => 'Osmolality',
+			'term_slug' => 'clinical-chemistry-reagents',
+		),
+	);
+}
+
+/**
+ * Resolve the best display title for a product category admin page.
+ *
+ * Prefers the live product_category term name when present.
+ *
+ * @param string               $origin Origin directory slug.
+ * @param array{title?:string,term_slug?:string} $config Page config.
+ * @return string
+ */
+function arkray_product_category_admin_page_title( $origin, array $config ) {
+	$candidates = array_filter(
+		array(
+			$origin,
+			isset( $config['term_slug'] ) ? $config['term_slug'] : '',
+			arkray_normalize_product_category_wp_slug( $origin ),
+		)
+	);
+
+	foreach ( array_unique( $candidates ) as $slug ) {
+		$term = get_term_by( 'slug', $slug, 'product_category' );
+		if ( $term instanceof WP_Term && ! is_wp_error( $term ) && '' !== trim( $term->name ) ) {
+			return $term->name;
+		}
+	}
+
+	return isset( $config['title'] ) ? (string) $config['title'] : $origin;
+}
+
+/**
+ * Locate a product category landing page by origin slug, including drafts.
+ *
+ * @param string $origin Origin directory slug (e.g. diabetes).
+ * @return WP_Post|null
+ */
+function arkray_find_product_category_page( $origin ) {
+	$origin = sanitize_title( $origin );
+	if ( '' === $origin ) {
+		return null;
+	}
+
+	$page = get_page_by_path( 'products/' . $origin, OBJECT, 'page' );
+	if ( $page instanceof WP_Post ) {
+		return $page;
+	}
+
+	$by_meta = get_posts(
+		array(
+			'post_type'              => 'page',
+			'post_status'            => array( 'publish', 'draft', 'pending', 'private' ),
+			'posts_per_page'         => 1,
+			'meta_key'               => '_arkray_product_category_origin',
+			'meta_value'             => $origin,
+			'no_found_rows'          => true,
+			'update_post_meta_cache' => false,
+			'update_post_term_cache' => false,
+		)
+	);
+	if ( ! empty( $by_meta[0] ) && $by_meta[0] instanceof WP_Post ) {
+		return $by_meta[0];
+	}
+
+	global $wpdb;
+	$page_id = $wpdb->get_var(
+		$wpdb->prepare(
+			"SELECT ID FROM {$wpdb->posts} WHERE post_name = %s AND post_type = 'page' AND post_status != 'trash' LIMIT 1",
+			$origin
+		)
+	);
+
+	return $page_id ? get_post( (int) $page_id ) : null;
+}
+
+/**
+ * Page ID for a product category origin in the current (or supplied) language.
+ *
+ * @param string $origin Origin directory slug.
+ * @param string $lang   Optional Polylang slug.
+ * @return int
+ */
+function arkray_get_product_category_page_id_for_origin( $origin, $lang = '' ) {
+	$page = arkray_find_product_category_page( $origin );
+	if ( ! $page instanceof WP_Post ) {
+		return 0;
+	}
+
+	$page_id = (int) $page->ID;
+	if ( '' === $lang ) {
+		if ( ! empty( $_REQUEST['lang'] ) ) {
+			$lang = sanitize_title( wp_unslash( $_REQUEST['lang'] ) );
+		} elseif ( function_exists( 'pll_current_language' ) ) {
+			$lang = (string) pll_current_language( 'slug' );
+		}
+		if ( '' === $lang ) {
+			$lang = arkray_get_language_slug_from_request_path();
+		}
+	}
+
+	if ( '' !== $lang && function_exists( 'pll_get_post' ) ) {
+		$translated = pll_get_post( $page_id, $lang );
+		if ( $translated ) {
+			return (int) $translated;
+		}
+	}
+
+	return (int) arkray_pll_post_id( $page );
+}
+
+/**
+ * Create or repair product category landing pages under Products.
+ *
+ * Idempotent: existing pages (including drafts) are published, parented under
+ * Products, and tagged with origin meta rather than duplicated.
+ *
+ * @return array<string,int|WP_Error> Map of origin => page ID or error.
+ */
+function arkray_provision_product_category_pages() {
+	$products_page = get_page_by_path( 'products' );
+	if ( ! $products_page instanceof WP_Post ) {
+		return array();
+	}
+
+	$results = array();
+	foreach ( arkray_product_category_admin_pages() as $origin => $config ) {
+		$title     = arkray_product_category_admin_page_title( $origin, $config );
+		$term_slug = isset( $config['term_slug'] ) ? (string) $config['term_slug'] : $origin;
+		$existing  = arkray_find_product_category_page( $origin );
+
+		if ( $existing instanceof WP_Post ) {
+			$page_id = (int) $existing->ID;
+			$update  = array( 'ID' => $page_id );
+
+			if ( 'publish' !== $existing->post_status ) {
+				$update['post_status'] = 'publish';
+			}
+			if ( (int) $existing->post_parent !== (int) $products_page->ID ) {
+				$update['post_parent'] = (int) $products_page->ID;
+			}
+			if ( $origin !== $existing->post_name ) {
+				$update['post_name'] = $origin;
+			}
+			if ( $title !== $existing->post_title ) {
+				$update['post_title'] = $title;
+			}
+
+			if ( count( $update ) > 1 ) {
+				$updated = wp_update_post( $update, true );
+				if ( is_wp_error( $updated ) ) {
+					$results[ $origin ] = $updated;
+					continue;
+				}
+			}
+		} else {
+			$page_id = wp_insert_post(
+				array(
+					'post_type'    => 'page',
+					'post_status'  => 'publish',
+					'post_title'   => $title,
+					'post_name'    => $origin,
+					'post_parent'  => (int) $products_page->ID,
+					'post_content' => '',
+				),
+				true
+			);
+
+			if ( is_wp_error( $page_id ) ) {
+				$results[ $origin ] = $page_id;
+				continue;
+			}
+		}
+
+		update_post_meta( (int) $page_id, '_arkray_product_category_origin', $origin );
+		update_post_meta( (int) $page_id, '_arkray_product_category_term', $term_slug );
+
+		if ( 'template-products.php' !== get_page_template_slug( (int) $page_id ) ) {
+			update_post_meta( (int) $page_id, '_wp_page_template', 'template-products.php' );
+		}
+
+		arkray_link_page_to_all_languages( (int) $page_id );
+		$results[ $origin ] = (int) $page_id;
+	}
+
+	return $results;
+}
+
+/**
+ * Create product category landing pages once so they are manageable under Pages.
+ *
+ * Runs a single time; delete the `arkray_product_category_pages_created_v1`
+ * option to re-run provisioning.
+ */
+function arkray_ensure_product_category_pages_once() {
+	if ( get_option( 'arkray_product_category_pages_created_v1' ) ) {
+		return;
+	}
+
+	if ( ! is_admin() || ! current_user_can( 'manage_options' ) ) {
+		return;
+	}
+
+	$results = arkray_provision_product_category_pages();
+	if ( empty( $results ) ) {
+		return;
+	}
+
+	foreach ( $results as $result ) {
+		if ( is_wp_error( $result ) ) {
+			return;
+		}
+	}
+
+	update_option( 'arkray_product_category_pages_created_v1', 1 );
+	flush_rewrite_rules( false );
+}
+add_action( 'admin_init', 'arkray_ensure_product_category_pages_once' );
+
+/**
+ * Emit canonical /products/{origin}/ permalinks for category landing pages.
+ *
+ * @param string $permalink Default page permalink.
+ * @param int    $post_id   Page ID.
+ * @return string
+ */
+function arkray_product_category_admin_page_link( $permalink, $post_id ) {
+	$origin = (string) get_post_meta( (int) $post_id, '_arkray_product_category_origin', true );
+	if ( '' === $origin ) {
+		$page = get_post( (int) $post_id );
+		if ( ! $page instanceof WP_Post || 'page' !== $page->post_type ) {
+			return $permalink;
+		}
+
+		$admin_pages = arkray_product_category_admin_pages();
+		if ( ! isset( $admin_pages[ $page->post_name ] ) ) {
+			return $permalink;
+		}
+		$origin = $page->post_name;
+	}
+
+	return arkray_home_url( '/products/' . $origin . '/' );
+}
+add_filter( 'page_link', 'arkray_product_category_admin_page_link', 20, 2 );
+
+/**
+ * When a category landing page is requested directly, hydrate the pcat query var
+ * so template-products.php renders the matching category view.
+ */
+function arkray_hydrate_pcat_from_category_page() {
+	if ( is_admin() || ! is_page() ) {
+		return;
+	}
+
+	$pcat = get_query_var( 'pcat' );
+	if ( '' !== $pcat ) {
+		return;
+	}
+
+	$page_id = (int) get_queried_object_id();
+	if ( $page_id <= 0 ) {
+		return;
+	}
+
+	$origin = (string) get_post_meta( $page_id, '_arkray_product_category_origin', true );
+	if ( '' === $origin ) {
+		$page = get_post( $page_id );
+		if ( ! $page instanceof WP_Post ) {
+			return;
+		}
+		$admin_pages = arkray_product_category_admin_pages();
+		if ( ! isset( $admin_pages[ $page->post_name ] ) ) {
+			return;
+		}
+		$origin = $page->post_name;
+	}
+
+	$routes = arkray_origin_category_rewrite_routes();
+	$pcat   = isset( $routes[ $origin ] )
+		? arkray_normalize_product_category_wp_slug( $routes[ $origin ] )
+		: arkray_normalize_product_category_wp_slug( $origin );
+
+	if ( '' === $pcat ) {
+		return;
+	}
+
+	set_query_var( 'pcat', $pcat );
+	$GLOBALS['wp_query']->set( 'pcat', $pcat );
+}
+add_action( 'wp', 'arkray_hydrate_pcat_from_category_page', 5 );
+
+/**
  * Add rewrite rules so /products/{origin_slug}/(index.html)? maps to the
  * products page with the appropriate pcat query var.
  *
@@ -6205,13 +6531,17 @@ function arkray_add_origin_category_rewrites() {
 	if ( ! $products_page ) {
 		return;
 	}
-	$pid     = $products_page->ID;
-	$lang_re = arkray_language_slugs_regex();
+	$fallback_pid = (int) $products_page->ID;
+	$lang_re      = arkray_language_slugs_regex();
 
 	foreach ( arkray_origin_category_rewrite_routes() as $origin => $term_slug ) {
 		$origin_q = preg_quote( $origin, '#' );
 		$pcat     = rawurlencode( $term_slug );
-		$base     = 'index.php?page_id=' . $pid . '&pcat=' . $pcat;
+		$page_id  = arkray_get_product_category_page_id_for_origin( $origin );
+		if ( $page_id <= 0 ) {
+			$page_id = $fallback_pid;
+		}
+		$base = 'index.php?page_id=' . $page_id . '&pcat=' . $pcat;
 
 		// Bare form (no language directory).
 		add_rewrite_rule( '^products/' . $origin_q . '/index\.html$', $base, 'top' );
