@@ -704,7 +704,10 @@ class Arkray_TI_Importer {
 
 		$source = $this->find_source_post( $group );
 		if ( is_wp_error( $source ) ) {
-			$this->add_result( $line, '', $source_ref, 'error', $source->get_error_message() );
+			// A page that has been thrown away is a normal state of affairs, not
+			// a fault in the file, so it is reported as skipped.
+			$action = 'arkray_ti_in_trash' === $source->get_error_code() ? 'skipped' : 'error';
+			$this->add_result( $line, '', $source_ref, $action, $source->get_error_message() );
 			return;
 		}
 
@@ -743,7 +746,12 @@ class Arkray_TI_Importer {
 			}
 		}
 
-		$target_id = (int) pll_get_post( $source->ID, $this->target_lang );
+		$trashed   = false;
+		$target_id = $this->translation_id( $source, $trashed );
+
+		if ( $trashed ) {
+			$messages[] = __( 'The translation that existed is in the trash; it was left there and a new one was made.', 'arkray-translation-importer' );
+		}
 
 		if ( $target_id ) {
 			$result = $this->update_translation( $target_id, $source, $content, $title, $dry_run, $messages );
@@ -906,7 +914,7 @@ class Arkray_TI_Importer {
 	 * @return void
 	 */
 	private function keep_existing_translation( WP_Post $source, array $blocks, array &$texts, array &$images ) {
-		$target_id = (int) pll_get_post( $source->ID, $this->target_lang );
+		$target_id = $this->translation_id( $source );
 		if ( ! $target_id ) {
 			return;
 		}
@@ -1184,6 +1192,70 @@ class Arkray_TI_Importer {
 	}
 
 	/**
+	 * The translation of a post in the target language.
+	 *
+	 * A translation sitting in the trash counts as no translation: it is left
+	 * where it is instead of being quietly revived and written to.
+	 *
+	 * @param WP_Post $source    Original post.
+	 * @param bool    $in_trash  Set to true when a translation exists but is in
+	 *                           the trash, by reference.
+	 * @return int Post ID, or 0.
+	 */
+	private function translation_id( WP_Post $source, &$in_trash = false ) {
+		$in_trash  = false;
+		$target_id = (int) pll_get_post( $source->ID, $this->target_lang );
+		if ( ! $target_id ) {
+			return 0;
+		}
+
+		$target = get_post( $target_id );
+		if ( ! $target instanceof WP_Post ) {
+			return 0;
+		}
+
+		if ( 'trash' === $target->post_status ) {
+			$in_trash = true;
+			return 0;
+		}
+
+		return $target_id;
+	}
+
+	/**
+	 * Look for a post with this slug in the trash.
+	 *
+	 * Used to tell "the page was thrown away" apart from "the file names a page
+	 * that never existed". WordPress may add "__trashed" to the slug when a post
+	 * is trashed, so both spellings are tried.
+	 *
+	 * @param string $slug Slug or page path from the file.
+	 * @return WP_Post|null
+	 */
+	private static function find_trashed_post( $slug ) {
+		$name = sanitize_title( basename( $slug ) );
+
+		foreach ( array( $name, $name . '__trashed' ) as $candidate ) {
+			$found = get_posts(
+				array(
+					'post_type'        => 'any',
+					'post_status'      => 'trash',
+					'name'             => $candidate,
+					'numberposts'      => 1,
+					'lang'             => '',
+					'suppress_filters' => false,
+				)
+			);
+
+			if ( ! empty( $found ) ) {
+				return $found[0];
+			}
+		}
+
+		return null;
+	}
+
+	/**
 	 * Locate the original (source-language) post for a group by id or slug.
 	 *
 	 * @param array $row Group or canonicalized row carrying id and slug.
@@ -1230,6 +1302,19 @@ class Arkray_TI_Importer {
 			}
 
 			if ( ! $post instanceof WP_Post ) {
+				$trashed = self::find_trashed_post( $slug );
+				if ( $trashed instanceof WP_Post ) {
+					return new WP_Error(
+						'arkray_ti_in_trash',
+						sprintf(
+							/* translators: 1: post title, 2: post ID */
+							__( 'The original "%1$s" (#%2$d) is in the trash, so it was left alone. Restore it and import again if it should be translated.', 'arkray-translation-importer' ),
+							$trashed->post_title,
+							$trashed->ID
+						)
+					);
+				}
+
 				return new WP_Error(
 					'arkray_ti_not_found',
 					sprintf( __( 'No post found with slug "%s".', 'arkray-translation-importer' ), $slug )
@@ -1237,6 +1322,20 @@ class Arkray_TI_Importer {
 			}
 		} else {
 			return new WP_Error( 'arkray_ti_no_identifier', __( 'The row has neither an id nor a slug, so the original post cannot be identified.', 'arkray-translation-importer' ) );
+		}
+
+		// Checked before anything else about the post: once it is in the trash,
+		// nothing else about it is worth reporting.
+		if ( 'trash' === $post->post_status ) {
+			return new WP_Error(
+				'arkray_ti_in_trash',
+				sprintf(
+					/* translators: 1: post title, 2: post ID */
+					__( 'The original "%1$s" (#%2$d) is in the trash, so it was left alone. Restore it and import again if it should be translated.', 'arkray-translation-importer' ),
+					$post->post_title,
+					$post->ID
+				)
+			);
 		}
 
 		if ( ! pll_is_translated_post_type( $post->post_type ) ) {
@@ -1292,6 +1391,7 @@ class Arkray_TI_Importer {
 			'post_type'      => $source->post_type,
 			'post_status'    => 'publish',
 			'post_title'     => '' !== $title ? $title : $source->post_title,
+			'post_name'      => $source->post_name,
 			'post_content'   => null === $content ? $source->post_content : $content,
 			'post_excerpt'   => $source->post_excerpt,
 			'post_date'      => $source->post_date,
@@ -1300,7 +1400,7 @@ class Arkray_TI_Importer {
 			'ping_status'    => $source->ping_status,
 		);
 
-		$post_id = wp_insert_post( wp_slash( $postarr ), true );
+		$post_id = $this->insert_keeping_slug( $postarr );
 		if ( is_wp_error( $post_id ) ) {
 			return $post_id;
 		}
@@ -1369,8 +1469,20 @@ class Arkray_TI_Importer {
 			$postarr['post_title'] = $title;
 		}
 
+		// Keep the URL of the translation in step with the original.
+		$target = get_post( $target_id );
+		if ( $target instanceof WP_Post && '' !== $source->post_name && $target->post_name !== $source->post_name ) {
+			$postarr['post_name'] = $source->post_name;
+			$messages[]           = sprintf(
+				/* translators: 1: new slug, 2: previous slug */
+				__( 'Slug changed to "%1$s" to match the original (was "%2$s").', 'arkray-translation-importer' ),
+				$source->post_name,
+				$target->post_name
+			);
+		}
+
 		if ( count( $postarr ) > 1 ) {
-			$updated = wp_update_post( wp_slash( $postarr ), true );
+			$updated = $this->insert_keeping_slug( $postarr );
 			if ( is_wp_error( $updated ) ) {
 				return $updated;
 			}
@@ -1386,6 +1498,45 @@ class Arkray_TI_Importer {
 		pll_save_post_translations( $translations );
 
 		return array( 'updated', $target_id );
+	}
+
+	/**
+	 * Save a post keeping the slug it asks for.
+	 *
+	 * A translation is given the slug of its original, so that the two share a
+	 * URL path under their own language directory. WordPress would otherwise add
+	 * a counter to it, since the original already holds that slug.
+	 *
+	 * @param array $postarr Post data, with an ID to update an existing post.
+	 * @return int|WP_Error Post ID.
+	 */
+	private function insert_keeping_slug( array $postarr ) {
+		add_filter( 'wp_unique_post_slug', array( $this, 'keep_requested_slug' ), 10, 6 );
+
+		$result = empty( $postarr['ID'] )
+			? wp_insert_post( wp_slash( $postarr ), true )
+			: wp_update_post( wp_slash( $postarr ), true );
+
+		remove_filter( 'wp_unique_post_slug', array( $this, 'keep_requested_slug' ), 10 );
+
+		return $result;
+	}
+
+	/**
+	 * Hand back the slug that was asked for, counter and all.
+	 *
+	 * Only hooked while this class saves a post, see insert_keeping_slug().
+	 *
+	 * @param string $slug          Slug WordPress settled on.
+	 * @param int    $post_id       Post ID.
+	 * @param string $post_status   Post status.
+	 * @param string $post_type     Post type.
+	 * @param int    $post_parent   Parent post ID.
+	 * @param string $original_slug Slug that was asked for.
+	 * @return string
+	 */
+	public function keep_requested_slug( $slug, $post_id, $post_status, $post_type, $post_parent, $original_slug ) {
+		return '' !== (string) $original_slug ? (string) $original_slug : $slug;
 	}
 
 	/**
@@ -1475,9 +1626,15 @@ class Arkray_TI_Importer {
 				continue;
 			}
 
-			$parent_translation = (int) pll_get_post( $source->post_parent, $this->target_lang );
+			$source_parent = get_post( $source->post_parent );
+			if ( ! $source_parent instanceof WP_Post ) {
+				continue;
+			}
+
+			// A parent in the trash would drag the child's URL down with it.
+			$parent_translation = $this->translation_id( $source_parent );
 			if ( $parent_translation && (int) $target->post_parent !== $parent_translation ) {
-				wp_update_post(
+				$this->insert_keeping_slug(
 					array(
 						'ID'          => $target->ID,
 						'post_parent' => $parent_translation,

@@ -2,7 +2,7 @@
 /**
  * Plugin Name: ARKRAY Translation Importer
  * Description: Bulk create or update translations (e.g. Vietnamese) for pages and custom post types from a single spreadsheet upload. The exported Excel file holds one row per title, paragraph, table cell and image, each with its own ID, without any HTML tags and with every cell formatted as text; on import the tags of the original page are put back around the translations. Requires Polylang.
- * Version: 1.3.0
+ * Version: 1.4.0
  * Author: ARKRAY
  * Text Domain: arkray-translation-importer
  *
@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'ARKRAY_TI_VERSION', '1.3.0' );
+define( 'ARKRAY_TI_VERSION', '1.4.0' );
 define( 'ARKRAY_TI_DIR', plugin_dir_path( __FILE__ ) );
 define( 'ARKRAY_TI_PAGE_SLUG', 'arkray-translation-importer' );
 

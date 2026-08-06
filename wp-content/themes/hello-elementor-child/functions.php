@@ -6450,6 +6450,98 @@ function arkray_language_prefix_cpt_permalink( $permalink, $post ) {
 add_filter( 'post_type_link', 'arkray_language_prefix_cpt_permalink', 20, 2 );
 
 /**
+ * Send a language-prefixed URL to the translation it asks for.
+ *
+ * The rewrite rules above resolve a path to one fixed post and pass the language
+ * along in `lang`, and WordPress resolves a page path to a post ID without
+ * regard to the language, so /vietnamese/about/ arrives here pointing at the
+ * English page. Polylang cannot put that right on its own: by this point the
+ * request is a post ID, and filtering the query by language would only turn it
+ * into a 404. Swapping the ID for the translation is what lets a page and its
+ * translation share the same URL path under their own language directory.
+ *
+ * Untranslated content is left alone, so a page with no translation yet keeps
+ * showing its English version rather than disappearing.
+ *
+ * @param array $query_vars Query vars of the main request.
+ * @return array
+ */
+function arkray_route_request_to_language( $query_vars ) {
+	if ( is_admin() || ! function_exists( 'pll_get_post' ) ) {
+		return $query_vars;
+	}
+
+	// WordPress drops `lang` while parsing the request, and Polylang puts it back
+	// from the language it read off the URL, so fall back to that.
+	$language = ! empty( $query_vars['lang'] ) ? (string) $query_vars['lang'] : '';
+	if ( '' === $language && function_exists( 'pll_current_language' ) ) {
+		$language = (string) pll_current_language();
+	}
+
+	if ( '' === $language ) {
+		return $query_vars;
+	}
+
+	// A page addressed by its path.
+	if ( ! empty( $query_vars['pagename'] ) ) {
+		$page        = get_page_by_path( (string) $query_vars['pagename'] );
+		$translation = arkray_translation_for_language( $page instanceof WP_Post ? (int) $page->ID : 0, $language );
+
+		if ( $translation ) {
+			unset( $query_vars['pagename'] );
+			$query_vars['page_id'] = $translation;
+		}
+
+		return $query_vars;
+	}
+
+	// A page or post addressed by ID, which is what the rules above produce.
+	foreach ( array( 'page_id', 'p' ) as $var ) {
+		if ( empty( $query_vars[ $var ] ) || ! is_numeric( $query_vars[ $var ] ) ) {
+			continue;
+		}
+
+		$translation = arkray_translation_for_language( (int) $query_vars[ $var ], $language );
+		if ( $translation ) {
+			$query_vars[ $var ] = $translation;
+		}
+	}
+
+	return $query_vars;
+}
+add_filter( 'request', 'arkray_route_request_to_language', 20 );
+
+/**
+ * The translation of a post that can be shown in a language.
+ *
+ * @param int    $post_id  Post the URL resolved to.
+ * @param string $language Language slug asked for.
+ * @return int Post ID, or 0 when the post is already in that language or has no
+ *             translation fit to show.
+ */
+function arkray_translation_for_language( $post_id, $language ) {
+	if ( $post_id <= 0 || '' === $language || ! function_exists( 'pll_get_post_language' ) ) {
+		return 0;
+	}
+
+	if ( pll_get_post_language( $post_id ) === $language ) {
+		return 0;
+	}
+
+	$translation = (int) pll_get_post( $post_id, $language );
+	if ( ! $translation || $translation === (int) $post_id ) {
+		return 0;
+	}
+
+	// A draft or a thrown-away translation must not replace a page that works.
+	if ( 'publish' !== get_post_status( $translation ) ) {
+		return 0;
+	}
+
+	return $translation;
+}
+
+/**
  * Nest product detail permalinks under their category's origin directory so the
  * emitted URL is /products/{origin}/{slug}/ (e.g. /english/products/diabetes/
  * ha-8190v/) instead of the flat /products/{slug}/. Pairs with the rewrite

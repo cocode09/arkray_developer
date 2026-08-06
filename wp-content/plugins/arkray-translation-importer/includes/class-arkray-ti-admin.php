@@ -175,6 +175,7 @@ class Arkray_TI_Admin {
 			$posts = get_posts(
 				array(
 					'post_type'        => $post_type,
+					// Deliberately without 'trash': thrown away pages are not translated.
 					'post_status'      => array( 'publish', 'draft', 'private', 'pending' ),
 					'numberposts'      => -1,
 					'orderby'          => 'ID',
@@ -233,9 +234,8 @@ class Arkray_TI_Admin {
 		$fields = self::page_fields( $post );
 		$base   = self::row_style( $post );
 
-		$translation_id = (int) pll_get_post( $post->ID, $target );
-		$translation    = $translation_id ? get_post( $translation_id ) : null;
-		$current        = $translation instanceof WP_Post
+		$translation = self::existing_translation( $post->ID, $target );
+		$current     = $translation instanceof WP_Post
 			? Arkray_TI_Blocks::extract( $translation->post_content )
 			: array();
 
@@ -301,6 +301,30 @@ class Arkray_TI_Admin {
 		}
 
 		return $rows;
+	}
+
+	/**
+	 * The translation whose text is prefilled in the target-language columns.
+	 *
+	 * One that sits in the trash is ignored, so its text is not offered as the
+	 * current translation.
+	 *
+	 * @param int    $post_id Original post ID.
+	 * @param string $target  Target language slug.
+	 * @return WP_Post|null
+	 */
+	private static function existing_translation( $post_id, $target ) {
+		$translation_id = (int) pll_get_post( $post_id, $target );
+		if ( ! $translation_id ) {
+			return null;
+		}
+
+		$translation = get_post( $translation_id );
+		if ( ! $translation instanceof WP_Post || 'trash' === $translation->post_status ) {
+			return null;
+		}
+
+		return $translation;
 	}
 
 	/**
@@ -830,6 +854,8 @@ class Arkray_TI_Admin {
 		echo '<p>' . esc_html__( 'Every cell of the export is formatted as text, so Excel leaves the content alone: a paragraph starting with "-" or "+" stays text instead of turning into a #NAME? formula error, and phone numbers and codes keep their leading characters.', 'arkray-translation-importer' ) . '</p>';
 		echo '<p>' . esc_html__( 'On import the HTML tags of the original page are put back around each translated text, so the translation is stored as complete HTML exactly like the original. Rows left blank keep what the current translation says, or the original text when there is no translation yet.', 'arkray-translation-importer' ) . '</p>';
 		echo '<p>' . esc_html__( 'The import is safe to repeat: existing translations are updated, missing ones are created, and pages without any translated text are skipped without touching anything.', 'arkray-translation-importer' ) . '</p>';
+		echo '<p>' . esc_html__( 'Anything in the trash is left out of this: trashed pages and posts are not exported, a row pointing at one is reported as skipped, and a translation that sits in the trash stays there and is replaced by a new one rather than being revived.', 'arkray-translation-importer' ) . '</p>';
+		echo '<p>' . esc_html__( 'A translation is given the same slug as its original, so the two share a URL path under their own language directory: an English page at /english/about/ has its translation at /vietnamese/about/.', 'arkray-translation-importer' ) . '</p>';
 		echo '<p>' . esc_html__( 'Export again whenever the English content changed: an ID says which paragraph, cell or image it belongs to, so an outdated file can leave text in the wrong place or be reported as unknown.', 'arkray-translation-importer' ) . '</p>';
 		echo '</div>';
 	}
