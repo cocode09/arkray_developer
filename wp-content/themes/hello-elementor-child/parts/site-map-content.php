@@ -1,10 +1,11 @@
 <?php
 /**
- * Site Map — #editor_area content.
+ * Site Map — #editor_area body content (no page title).
  *
- * Verbatim port of the #editor_area block from the ARKRAY Site Map reference
- * page (Sandbox/Site Map _ ARKRAY, Inc..html). Classes sitemap_area,
- * sitemap_left, sitemap_right, sitemap are styled by assets/arkray-content.css.
+ * The H1 comes from the WordPress page Title field via template-site-map.php.
+ * Verbatim port of the #editor_area body from the ARKRAY Site Map reference
+ * page. Classes sitemap_area, sitemap_left, sitemap_right, sitemap are styled
+ * by assets/arkray-content.css.
  *
  * This partial is only included when the WordPress page body is empty, so the
  * admin can override every link via Pages > Site Map > Edit.
@@ -36,7 +37,6 @@ if ( ! $terms_page ) {
 $privacy_url = esc_url( arkray_get_privacy_policy_url() );
 $terms_url   = esc_url( arkray_get_terms_of_use_url() );
 ?>
-<h1 class="h1_index"><?php echo esc_html( arkray_t( 'Site Map' ) ); ?></h1>
 <div class="sitemap_area cf">
 	<div class="sitemap_left">
 		<h2><a href="<?php echo $news_page_url; ?>"><?php echo esc_html( arkray_t( 'News & Topics' ) ); ?></a></h2>

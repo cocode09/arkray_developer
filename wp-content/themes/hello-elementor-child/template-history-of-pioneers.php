@@ -156,10 +156,10 @@ $logo_src       = $custom_logo_id
 				<li><a href="<?php echo $products_page_url; ?>"><?php echo esc_html( arkray_t( 'Products' ) ); ?></a></li>
 				<li><a href="<?php echo $history_url; ?>" class="ac"><?php echo esc_html( arkray_t( 'History of Pioneers' ) ); ?></a>
 					<ul style="display: block;">
-						<li><a href="<?php echo $hop_diabetes_url; ?>"<?php echo 'diabetes-testing' === $current_page['type'] ? ' class="ac"' : ''; ?>>Diabetes testing</a></li>
-						<li><a href="<?php echo $hop_urinalysis_url; ?>"<?php echo 'urinalysis' === $current_page['type'] ? ' class="ac"' : ''; ?>>Urinalysis</a></li>
-						<li><a href="<?php echo $hop_dry_url; ?>"<?php echo 'dry-chemistry-testing' === $current_page['type'] ? ' class="ac"' : ''; ?>>Dry Chemistry Testing</a></li>
-						<li><a href="<?php echo $hop_bgm_url; ?>"<?php echo 'bgm' === $current_page['type'] ? ' class="ac"' : ''; ?>>BGM</a></li>
+						<li><a href="<?php echo $hop_diabetes_url; ?>"<?php echo 'diabetes-testing' === $current_page['type'] ? ' class="ac"' : ''; ?>><?php echo esc_html( arkray_t( 'Diabetes testing' ) ); ?></a></li>
+						<li><a href="<?php echo $hop_urinalysis_url; ?>"<?php echo 'urinalysis' === $current_page['type'] ? ' class="ac"' : ''; ?>><?php echo esc_html( arkray_t( 'Urinalysis' ) ); ?></a></li>
+						<li><a href="<?php echo $hop_dry_url; ?>"<?php echo 'dry-chemistry-testing' === $current_page['type'] ? ' class="ac"' : ''; ?>><?php echo esc_html( arkray_t( 'Dry Chemistry Testing' ) ); ?></a></li>
+						<li><a href="<?php echo $hop_bgm_url; ?>"<?php echo 'bgm' === $current_page['type'] ? ' class="ac"' : ''; ?>><?php echo esc_html( arkray_t( 'BGM' ) ); ?></a></li>
 					</ul>
 				</li>
 				<li><a href="<?php echo $events_page_url; ?>"><?php echo esc_html( arkray_t( 'Events & Gallery' ) ); ?></a></li>
@@ -177,10 +177,10 @@ $logo_src       = $custom_logo_id
 		<li><a href="<?php echo $products_page_url; ?>"><?php echo esc_html( arkray_t( 'Products' ) ); ?></a></li>
 		<li><a href="<?php echo $history_url; ?>" class="ac"><?php echo esc_html( arkray_t( 'History of Pioneers' ) ); ?></a>
 			<ul style="display: block;">
-				<li><a href="<?php echo $hop_diabetes_url; ?>"<?php echo 'diabetes-testing' === $current_page['type'] ? ' class="ac"' : ''; ?>>Diabetes testing</a></li>
-				<li><a href="<?php echo $hop_urinalysis_url; ?>"<?php echo 'urinalysis' === $current_page['type'] ? ' class="ac"' : ''; ?>>Urinalysis</a></li>
-				<li><a href="<?php echo $hop_dry_url; ?>"<?php echo 'dry-chemistry-testing' === $current_page['type'] ? ' class="ac"' : ''; ?>>Dry Chemistry Testing</a></li>
-				<li><a href="<?php echo $hop_bgm_url; ?>"<?php echo 'bgm' === $current_page['type'] ? ' class="ac"' : ''; ?>>BGM</a></li>
+				<li><a href="<?php echo $hop_diabetes_url; ?>"<?php echo 'diabetes-testing' === $current_page['type'] ? ' class="ac"' : ''; ?>><?php echo esc_html( arkray_t( 'Diabetes testing' ) ); ?></a></li>
+				<li><a href="<?php echo $hop_urinalysis_url; ?>"<?php echo 'urinalysis' === $current_page['type'] ? ' class="ac"' : ''; ?>><?php echo esc_html( arkray_t( 'Urinalysis' ) ); ?></a></li>
+				<li><a href="<?php echo $hop_dry_url; ?>"<?php echo 'dry-chemistry-testing' === $current_page['type'] ? ' class="ac"' : ''; ?>><?php echo esc_html( arkray_t( 'Dry Chemistry Testing' ) ); ?></a></li>
+				<li><a href="<?php echo $hop_bgm_url; ?>"<?php echo 'bgm' === $current_page['type'] ? ' class="ac"' : ''; ?>><?php echo esc_html( arkray_t( 'BGM' ) ); ?></a></li>
 			</ul>
 		</li>
 		<li><a href="<?php echo $events_page_url; ?>"><?php echo esc_html( arkray_t( 'Events & Gallery' ) ); ?></a></li>

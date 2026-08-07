@@ -168,7 +168,7 @@ class Arkray_TI_Admin {
 		@set_time_limit( 300 );
 		wp_raise_memory_limit( 'admin' );
 
-		$rows     = array();
+		$rows     = Arkray_TI_Strings::export_rows( $target );
 		$prefixes = array();
 
 		foreach ( $post_types as $post_type ) {
@@ -184,6 +184,10 @@ class Arkray_TI_Admin {
 					'suppress_filters' => false,
 				)
 			);
+
+			if ( is_post_type_hierarchical( $post_type ) ) {
+				$posts = self::order_pages_for_export( $posts );
+			}
 
 			foreach ( $posts as $post ) {
 				$slug = is_post_type_hierarchical( $post_type ) ? get_page_uri( $post ) : $post->post_name;
@@ -364,6 +368,19 @@ class Arkray_TI_Admin {
 	/**
 	 * Lay one row out in the column order of the export.
 	 *
+	 * Public so {@see Arkray_TI_Strings} can reuse the same column layout.
+	 *
+	 * @param array $values Row values keyed by role.
+	 * @param array $fields Page level fields: scope, is_new, country.
+	 * @return array
+	 */
+	public static function export_row_public( array $values, array $fields ) {
+		return self::export_row( $values, $fields );
+	}
+
+	/**
+	 * Lay one row out in the column order of the export.
+	 *
 	 * @param array $values Row values keyed by role.
 	 * @param array $fields Page level fields: scope, is_new, country.
 	 * @return array
@@ -429,7 +446,7 @@ class Arkray_TI_Admin {
 			),
 			array( 'ID', 'ブロックごとの一意のID（ページ＋位置）', 'ha-8190v-tbl1-r2-c1', '書き換え不可。インポート時の位置の判別に使用します。' ),
 			array( 'Parent ID', '親ブロックのID（階層構造）', 'ha-8190v-title', '同じページのタイトル行を親として出力します。' ),
-			array( '種別', 'WordPressの投稿タイプ', 'page / news / event / product', '参照用。' ),
+			array( '種別', 'WordPressの投稿タイプ、または共有UI文字列', 'page / news / event / product / string', '参照用。string はヘッダー・ナビ・フッター等のテーマ文言。' ),
 			array( 'タイトル/箇所', 'そのブロックがページ内のどこかを示すメモ', 'Table 1, row 2, column 1', '参照用。翻訳対象ではありません。' ),
 			array( 'Global/Local', 'News・Eventsの分類', 'global / local', 'News・Eventsのみ。空欄の場合は現状を維持します。' ),
 			array( 'NEW', '新着フラグ', 'new', '「new」で表示、「0」で非表示、空欄は現状維持。' ),
@@ -483,12 +500,133 @@ class Arkray_TI_Admin {
 			array( '⑥', 'すべてのセルは書式「文字列」で出力しています。先頭が「-」「+」「=」の文字列もそのまま扱われます。' ),
 			array( '⑦', '英語版のページを更新した場合は、IDが変わることがあるため再度エクスポートしてください。' ),
 			array( '⑧', 'このファイルは.xlsxのままアップロードできます。CSVに変換する必要はありません。' ),
+			array( '⑨', '先頭の theme-ui セクションはヘッダー・ナビ・「more」・フッター・著作権表示など、ページ本文以外の共有文言です。Polylangの文字列翻訳として保存されます。' ),
 		);
 
 		return array(
 			'name'   => '凡例・ルール',
 			'widths' => array( 34, 58, 38, 52 ),
 			'rows'   => $rows,
+		);
+	}
+
+	/**
+	 * Canonical page order for the export, mirroring the site's top navigation
+	 * and Site Map (Home → News & Topics → Products → History of Pioneers →
+	 * Events & Gallery → About Us → Sustainability → Recruitment → Privacy
+	 * Policy → Website Terms of Use → Site Map), so the workbook can be
+	 * scanned or handed to translators section by section instead of by ID.
+	 *
+	 * Entries are full page paths as returned by get_page_uri() (parent/child
+	 * slugs joined with "/"). A page whose path is not listed here keeps its
+	 * place at the end of the export, in its normal ID order, so newly added
+	 * pages are never dropped.
+	 *
+	 * @return string[]
+	 */
+	private static function page_export_order() {
+		return array(
+			// Home.
+			'home',
+
+			// News & Topics.
+			'news',
+
+			// Products.
+			'products',
+			'products/diabetes',
+			'products/urinalysis',
+			'products/osmolality',
+
+			// History of Pioneers.
+			'diabetes-testing-1',
+			'diabetes-testing-2',
+			'test-2',
+			'test-3',
+			'poc_testing02',
+			'test-4',
+
+			// Events & Gallery.
+			'events_gallery',
+			'media-gallery',
+
+			// About Us.
+			'about',
+			'philosophy',
+			'message',
+			'concept',
+			'profile',
+			'business',
+			'history1960',
+			'history1970',
+			'history1980',
+			'history1990',
+			'history2000',
+			'history2010',
+			'history2020',
+			'arkray-group',
+			'group02',
+			'group03',
+			'group04',
+			'group05',
+
+			// Sustainability.
+			'sustainability',
+			'top-commitment',
+			'sdgs-basic-policy',
+			'arkrays-materiality',
+			'action',
+
+			// Recruitment.
+			'recruitment',
+
+			// Privacy Policy.
+			'policy',
+
+			// Website Terms of Use.
+			'use',
+
+			// Site Map.
+			'sitemap',
+		);
+	}
+
+	/**
+	 * Sort a hierarchical post type's posts into the site navigation order.
+	 *
+	 * Posts whose path matches an entry in self::page_export_order() are moved
+	 * into that position; every other post keeps its original (ID) order,
+	 * placed after all matched posts.
+	 *
+	 * @param WP_Post[] $posts Posts of one hierarchical post type, ID ASC.
+	 * @return WP_Post[] Reordered posts.
+	 */
+	private static function order_pages_for_export( array $posts ) {
+		$order       = array_flip( self::page_export_order() );
+		$unmatched   = count( $order );
+		$entries     = array();
+
+		foreach ( $posts as $index => $post ) {
+			$path        = get_page_uri( $post );
+			$rank        = isset( $order[ $path ] ) ? $order[ $path ] : ( $unmatched + $index );
+			$entries[]   = array( $rank, $index, $post );
+		}
+
+		usort(
+			$entries,
+			static function ( $a, $b ) {
+				if ( $a[0] === $b[0] ) {
+					return $a[1] <=> $b[1];
+				}
+				return $a[0] <=> $b[0];
+			}
+		);
+
+		return array_map(
+			static function ( $entry ) {
+				return $entry[2];
+			},
+			$entries
 		);
 	}
 
@@ -846,7 +984,7 @@ class Arkray_TI_Admin {
 		echo '<div class="card" style="max-width:1100px;">';
 		echo '<h2>' . esc_html__( 'Workflow', 'arkray-translation-importer' ) . '</h2>';
 		echo '<ol>';
-		echo '<li>' . esc_html__( 'Export the Excel file below. It contains no HTML: the title, every paragraph, heading, list item, table cell and image of a page is one row with its own ID, and a separator row marks where each page starts. A second sheet explains the columns and the row colours.', 'arkray-translation-importer' ) . '</li>';
+		echo '<li>' . esc_html__( 'Export the Excel file below. It contains no HTML: shared theme labels (header, navigation, “more”, footer, copyright) come first, then the title and every paragraph, heading, list item, table cell and image of each page — one row per item with its own ID. A separator row marks where each section starts. A second sheet explains the columns and the row colours.', 'arkray-translation-importer' ) . '</li>';
 		echo '<li>' . esc_html__( 'Translators fill the Vietnamese column next to each English cell, and the Vietnamese caption column for images. Do not add, delete, sort or renumber rows, and leave the ID, Parent ID and 箇所・メモ columns as they are: they say where the text goes.', 'arkray-translation-importer' ) . '</li>';
 		echo '<li>' . esc_html__( 'To show a different image in Vietnamese, put its file name in the "Vietnamese img" column. The file must already be in the media library.', 'arkray-translation-importer' ) . '</li>';
 		echo '<li>' . esc_html__( 'Upload the .xlsx file as it is, with "Dry run" first to preview, then "Import". There is no need to convert it to CSV.', 'arkray-translation-importer' ) . '</li>';
@@ -997,6 +1135,7 @@ class Arkray_TI_Admin {
 		echo '<h3>' . esc_html__( 'How an ID is built', 'arkray-translation-importer' ) . '</h3>';
 		echo '<p>' . esc_html__( 'After the page slug comes the position of the block:', 'arkray-translation-importer' ) . '</p>';
 		echo '<ul style="list-style:disc;margin-left:20px;">';
+		echo '<li><code>theme-ui-…</code> — ' . esc_html__( 'a shared theme label (header, navigation, footer, “more”, copyright). These are saved as Polylang string translations, not as page content.', 'arkray-translation-importer' ) . '</li>';
 		echo '<li><code>title</code> — ' . esc_html__( 'the page or post title', 'arkray-translation-importer' ) . '</li>';
 		echo '<li><code>p01</code>, <code>h01</code>, <code>li01</code>, <code>cap01</code> — ' . esc_html__( 'paragraph, heading, list item, figure caption', 'arkray-translation-importer' ) . '</li>';
 		echo '<li><code>tbl1-r2-c1</code>, <code>tbl1-caption</code> — ' . esc_html__( 'one table cell (table, row, column) and the caption of a table', 'arkray-translation-importer' ) . '</li>';
@@ -1004,7 +1143,7 @@ class Arkray_TI_Admin {
 		echo '<li><code>p03-2</code> — ' . esc_html__( 'the second piece of paragraph 3, which happens when a link or a bold word breaks the sentence', 'arkray-translation-importer' ) . '</li>';
 		echo '</ul>';
 
-		echo '<p class="description">' . esc_html__( 'Text that lives outside the post content (page builder layouts, widgets, menus, ACF fields) and the contents of preformatted blocks are not part of this file. Files exported by earlier versions of this plugin are still read: a file with a content_id column addresses text by position, and a file with only id, slug and content columns replaces the whole HTML of a page.', 'arkray-translation-importer' ) . '</p>';
+		echo '<p class="description">' . esc_html__( 'Page builder layouts, widgets, ACF fields and preformatted blocks are still outside this file. Theme chrome labels (navigation, footer, and similar) are included as theme-ui rows. Files exported by earlier versions of this plugin are still read: a file with a content_id column addresses text by position, and a file with only id, slug and content columns replaces the whole HTML of a page.', 'arkray-translation-importer' ) . '</p>';
 		echo '</div>';
 	}
 }

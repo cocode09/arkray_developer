@@ -373,6 +373,12 @@ class Arkray_TI_Importer {
 		}
 		$this->format = self::detect_format( $headers );
 
+		if ( self::FORMAT_BLOCK === $this->format ) {
+			foreach ( Arkray_TI_Strings::import( $this->theme_string_items( $rows ), $this->target_lang, (bool) $dry_run ) as $result ) {
+				$this->results[] = $result;
+			}
+		}
+
 		foreach ( $this->group_rows( $rows ) as $group ) {
 			$this->process_group( $group, (bool) $dry_run );
 		}
@@ -405,6 +411,29 @@ class Arkray_TI_Importer {
 			'summary' => $summary,
 			'format'  => $this->format,
 		);
+	}
+
+	/**
+	 * Theme-UI string rows from a block-format file, with spreadsheet line numbers.
+	 *
+	 * @param array[] $rows Associative rows from the spreadsheet.
+	 * @return array[] Each item: array( 'line' => int, 'row' => canonical row ).
+	 */
+	private function theme_string_items( array $rows ) {
+		$items = array();
+
+		foreach ( $rows as $index => $raw ) {
+			$row = $this->normalize_row( (array) $raw );
+			if ( '' === $row['block_id'] || ! Arkray_TI_Strings::is_theme_row( $row ) ) {
+				continue;
+			}
+			$items[] = array(
+				'line' => $index + 2, // +2: 1-based plus header row.
+				'row'  => $row,
+			);
+		}
+
+		return $items;
 	}
 
 	/**
@@ -465,6 +494,11 @@ class Arkray_TI_Importer {
 
 			if ( self::FORMAT_BLOCK === $this->format && '' === $row['block_id'] ) {
 				continue; // Section heading or spacer row.
+			}
+
+			// Shared theme labels are imported separately into Polylang strings.
+			if ( self::FORMAT_BLOCK === $this->format && Arkray_TI_Strings::is_theme_row( $row ) ) {
+				continue;
 			}
 
 			list( $prefix, $block ) = self::split_block_id( $row['block_id'] );

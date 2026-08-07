@@ -151,6 +151,106 @@ function arkray_get_privacy_policy_url() {
 }
 
 /**
+ * Remove a leading H1 from HTML, including after Gutenberg block comments.
+ *
+ * @param string $html Page body HTML.
+ * @return string
+ */
+function arkray_strip_leading_h1_html( $html ) {
+	$updated = preg_replace(
+		'#^\s*(?:<!--.*?-->\s*)*<h1\b[^>]*>.*?</h1>\s*#is',
+		'',
+		(string) $html,
+		1
+	);
+
+	return null === $updated ? (string) $html : $updated;
+}
+
+/**
+ * Remove a duplicate leading H1 from a page body.
+ *
+ * The page Title field is the canonical heading; older content H1s showed a
+ * second title in the editor and on the front end.
+ *
+ * @param WP_Post $page Page to clean.
+ * @return bool True when content was updated.
+ */
+function arkray_strip_leading_content_h1( WP_Post $page ) {
+	$content = (string) $page->post_content;
+	$updated = arkray_strip_leading_h1_html( $content );
+	if ( $updated === $content ) {
+		return false;
+	}
+
+	$result = wp_update_post(
+		array(
+			'ID'           => (int) $page->ID,
+			'post_content' => $updated,
+		),
+		true
+	);
+
+	return ! is_wp_error( $result );
+}
+
+/**
+ * Locate a page by the first matching slug.
+ *
+ * @param string[] $slugs Candidate slugs.
+ * @return WP_Post|null
+ */
+function arkray_find_page_by_slugs( array $slugs ) {
+	foreach ( $slugs as $slug ) {
+		$page = get_page_by_path( $slug, OBJECT, 'page' );
+		if ( $page instanceof WP_Post ) {
+			return $page;
+		}
+	}
+
+	return null;
+}
+
+/**
+ * Strip duplicate leading H1s from legal / about pages once.
+ *
+ * Covers Privacy Policy, Terms of Use, Site Map, About > Contact, and
+ * ARKRAY Group (including regional group pages).
+ * Re-run by deleting the `arkray_legal_pages_strip_content_h1_v4` option.
+ */
+function arkray_strip_legal_pages_content_h1_once() {
+	if ( get_option( 'arkray_legal_pages_strip_content_h1_v4' ) ) {
+		return;
+	}
+
+	if ( ! is_admin() || ! current_user_can( 'edit_pages' ) ) {
+		return;
+	}
+
+	$targets = array(
+		array( 'policy', 'privacy-policy' ),
+		array( 'use', 'website-terms-of-use', 'terms-of-use' ),
+		array( 'sitemap', 'site-map' ),
+		array( 'profile', 'about-contact', 'contact' ),
+		array( 'arkray-group', 'group' ),
+		array( 'group02', 'arkray-group-2' ),
+		array( 'group03', 'arkray-group-3' ),
+		array( 'group04', 'arkray-group-4' ),
+		array( 'group05', 'arkray-group-5' ),
+	);
+
+	foreach ( $targets as $slugs ) {
+		$page = arkray_find_page_by_slugs( $slugs );
+		if ( $page instanceof WP_Post ) {
+			arkray_strip_leading_content_h1( $page );
+		}
+	}
+
+	update_option( 'arkray_legal_pages_strip_content_h1_v4', 1 );
+}
+add_action( 'admin_init', 'arkray_strip_legal_pages_content_h1_once' );
+
+/**
  * Language-aware canonical Website Terms of Use URL.
  *
  * @return string
@@ -235,6 +335,15 @@ function arkray_register_polylang_strings() {
 		'Local',
 		'Back to Events',
 		'Related Products',
+		// Products sidebar sub-items (product category names).
+		'Diabetes Testing',
+		'Urinalysis / Urine Testing',
+		'Osmolality',
+		// History of Pioneers sidebar sub-items.
+		'Diabetes testing',
+		'Urinalysis',
+		'Dry Chemistry Testing',
+		'BGM',
 	);
 
 	foreach ( $strings as $string ) {
@@ -2900,14 +3009,17 @@ function arkray_prevent_about_virtual_404( $preempt, $wp_query ) {
 
 	$wp_query->is_404 = false;
 
-	$expected_id = arkray_get_about_subpage_id( $about_key );
-	$resolved_id = ! empty( $wp_query->posts ) ? (int) $wp_query->queried_object_id : 0;
-
-	if ( $expected_id && $resolved_id === $expected_id ) {
-		return true;
-	}
-
-	if ( $resolved_id && arkray_is_about_page( $resolved_id ) ) {
+	/*
+	 * When our per-language rewrite rule already resolved a real page for
+	 * this request (see arkray_add_about_rewrites()), trust it and stop —
+	 * queried_object_id is only populated lazily via get_queried_object(),
+	 * so checking that property directly here (instead of $wp_query->posts)
+	 * always reads 0 at this point in the request and would wrongly look
+	 * "unresolved", discarding the correctly-resolved translated page and
+	 * falling through to the language-blind slug lookup below, which always
+	 * returns the same (first-matching) page regardless of language.
+	 */
+	if ( ! empty( $wp_query->posts ) ) {
 		return true;
 	}
 
@@ -2976,34 +3088,76 @@ function arkray_about_page_link( $permalink, $post_id ) {
 add_filter( 'page_link', 'arkray_about_page_link', 20, 2 );
 
 /**
- * Register a single About sub-page rewrite for a URL slug segment.
+ * The page ID to serve for a given language.
  *
- * @param string $slug    Path segment under /about/ (e.g. group02, arkray-group-2).
- * @param string $base    Rewrite query (index.php?page_id=…).
- * @param string $lang_re Polylang language slug regex alternation.
+ * Resolves $base_id's published translation in $lang_slug when one exists,
+ * otherwise falls back to $base_id itself. This is what lets each language
+ * prefix load its own translated page instead of every language sharing the
+ * one ID baked into the rewrite rule at flush time. Shared by every virtual
+ * page router (About, Sustainability, …) that maps a URL slug straight to a
+ * `page_id`.
+ *
+ * @param int    $base_id   Anchor page ID (any post in the translation group).
+ * @param string $lang_slug Target language slug.
+ * @return int
+ */
+function arkray_virtual_page_id_for_language( $base_id, $lang_slug ) {
+	$base_id = (int) $base_id;
+
+	if ( $base_id && '' !== $lang_slug && function_exists( 'pll_get_post' ) ) {
+		$translated = (int) pll_get_post( $base_id, $lang_slug );
+		if ( $translated ) {
+			$post = get_post( $translated );
+			if ( $post instanceof WP_Post && 'publish' === $post->post_status ) {
+				return $translated;
+			}
+		}
+	}
+
+	return $base_id;
+}
+
+/**
+ * Register a single About sub-page rewrite for a URL slug segment, with one
+ * rule per language so each resolves to that language's own translated page.
+ *
+ * @param string   $slug      Path segment under /about/ (e.g. group02, arkray-group-2).
+ * @param int      $base_id   Page ID for the unprefixed URL (default language).
+ * @param string[] $languages Registered Polylang language slugs.
  * @return void
  */
-function arkray_add_about_slug_rewrite( $slug, $base, $lang_re ) {
+function arkray_add_about_slug_rewrite( $slug, $base_id, array $languages ) {
 	$slug = sanitize_title( (string) $slug );
-	if ( '' === $slug ) {
+	if ( '' === $slug || ! $base_id ) {
 		return;
 	}
 
 	$quoted = preg_quote( $slug, '#' );
-	add_rewrite_rule( '^about/' . $quoted . '/?$', $base, 'top' );
-	add_rewrite_rule(
-		'^(' . $lang_re . ')/about/' . $quoted . '/?$',
-		$base . '&lang=$matches[1]',
-		'top'
-	);
+	add_rewrite_rule( '^about/' . $quoted . '/?$', 'index.php?page_id=' . (int) $base_id, 'top' );
+
+	foreach ( $languages as $lang_slug ) {
+		$lang_id = arkray_virtual_page_id_for_language( $base_id, $lang_slug );
+		add_rewrite_rule(
+			'^' . preg_quote( (string) $lang_slug, '#' ) . '/about/' . $quoted . '/?$',
+			'index.php?page_id=' . (int) $lang_id . '&lang=' . rawurlencode( (string) $lang_slug ),
+			'top'
+		);
+	}
 }
 
 /**
  * Register rewrite rules so /about/{slug}/ URLs resolve to matching About pages.
+ *
+ * Each language prefix gets its own rule pointing at that language's own
+ * translated page ID (falling back to the page resolved for the request that
+ * triggered the flush when no translation exists yet), instead of every
+ * language sharing one ID baked in at flush time — the old behaviour, which
+ * made a newly-added translation unreachable until Polylang's own language
+ * mismatch redirect bounced visitors back to the original language.
  */
 function arkray_add_about_rewrites() {
-	$lang_re = arkray_language_slugs_regex();
-	$map     = arkray_get_about_public_page_map();
+	$map       = arkray_get_about_public_page_map();
+	$languages = function_exists( 'pll_languages_list' ) ? (array) pll_languages_list( array( 'fields' => 'slug' ) ) : array();
 
 	foreach ( $map as $page_key => $config ) {
 		$page_id = arkray_get_about_subpage_id( $page_key );
@@ -3011,11 +3165,16 @@ function arkray_add_about_rewrites() {
 			continue;
 		}
 
-		$base = 'index.php?page_id=' . (int) $page_id;
-
 		if ( 'about-us' === $page_key ) {
-			add_rewrite_rule( '^about/?$', $base, 'top' );
-			add_rewrite_rule( '^(' . $lang_re . ')/about/?$', $base . '&lang=$matches[1]', 'top' );
+			add_rewrite_rule( '^about/?$', 'index.php?page_id=' . (int) $page_id, 'top' );
+			foreach ( $languages as $lang_slug ) {
+				$lang_id = arkray_virtual_page_id_for_language( $page_id, $lang_slug );
+				add_rewrite_rule(
+					'^' . preg_quote( (string) $lang_slug, '#' ) . '/about/?$',
+					'index.php?page_id=' . (int) $lang_id . '&lang=' . rawurlencode( (string) $lang_slug ),
+					'top'
+				);
+			}
 			continue;
 		}
 
@@ -3025,12 +3184,15 @@ function arkray_add_about_rewrites() {
 		}
 
 		if ( 'history' === $page_key ) {
-			add_rewrite_rule( '^about/history([0-9]{4})/?$', $base, 'top' );
-			add_rewrite_rule(
-				'^(' . $lang_re . ')/about/history([0-9]{4})/?$',
-				$base . '&lang=$matches[1]',
-				'top'
-			);
+			add_rewrite_rule( '^about/history([0-9]{4})/?$', 'index.php?page_id=' . (int) $page_id, 'top' );
+			foreach ( $languages as $lang_slug ) {
+				$lang_id = arkray_virtual_page_id_for_language( $page_id, $lang_slug );
+				add_rewrite_rule(
+					'^' . preg_quote( (string) $lang_slug, '#' ) . '/about/history([0-9]{4})/?$',
+					'index.php?page_id=' . (int) $lang_id . '&lang=' . rawurlencode( (string) $lang_slug ),
+					'top'
+				);
+			}
 			continue;
 		}
 
@@ -3042,7 +3204,7 @@ function arkray_add_about_rewrites() {
 		}
 
 		foreach ( $rewrite_slugs as $slug ) {
-			arkray_add_about_slug_rewrite( $slug, $base, $lang_re );
+			arkray_add_about_slug_rewrite( $slug, $page_id, $languages );
 		}
 	}
 }
@@ -3050,17 +3212,20 @@ add_action( 'init', 'arkray_add_about_rewrites', 21 );
 
 /**
  * Flush rewrite rules once so /about/{slug}/ and /about/history{decade}/ resolve.
- * Re-run by deleting the `arkray_about_public_rewrites_v6` option.
+ * Re-run by deleting the `arkray_about_public_rewrites_v7` option.
+ *
+ * Bumped to v7: earlier versions baked a single page ID into every language's
+ * rewrite rule, so a translation added after the last flush was unreachable.
  */
 function arkray_flush_about_rewrites_once() {
-	if ( get_option( 'arkray_about_public_rewrites_v6' ) ) {
+	if ( get_option( 'arkray_about_public_rewrites_v7' ) ) {
 		return;
 	}
 	if ( ! is_admin() || ! current_user_can( 'manage_options' ) ) {
 		return;
 	}
 	flush_rewrite_rules();
-	update_option( 'arkray_about_public_rewrites_v6', 1 );
+	update_option( 'arkray_about_public_rewrites_v7', 1 );
 }
 add_action( 'admin_init', 'arkray_flush_about_rewrites_once' );
 
@@ -3318,34 +3483,41 @@ function arkray_sustainability_page_link( $permalink, $post_id ) {
 add_filter( 'page_link', 'arkray_sustainability_page_link', 20, 2 );
 
 /**
- * Register a single Sustainability sub-page rewrite for a URL slug segment.
+ * Register a single Sustainability sub-page rewrite for a URL slug segment,
+ * with one rule per language so each resolves to that language's own page.
  *
- * @param string $slug    Path segment under /sustainability/ (e.g. commitment, policy).
- * @param string $base    Rewrite query (index.php?page_id=…).
- * @param string $lang_re Polylang language slug regex alternation.
+ * @param string   $slug      Path segment under /sustainability/ (e.g. commitment, policy).
+ * @param int      $base_id   Page ID for the unprefixed URL (default language).
+ * @param string[] $languages Registered Polylang language slugs.
  * @return void
  */
-function arkray_add_sustainability_slug_rewrite( $slug, $base, $lang_re ) {
+function arkray_add_sustainability_slug_rewrite( $slug, $base_id, array $languages ) {
 	$slug = sanitize_title( (string) $slug );
-	if ( '' === $slug ) {
+	if ( '' === $slug || ! $base_id ) {
 		return;
 	}
 
 	$quoted = preg_quote( $slug, '#' );
-	add_rewrite_rule( '^sustainability/' . $quoted . '/?$', $base, 'top' );
-	add_rewrite_rule(
-		'^(' . $lang_re . ')/sustainability/' . $quoted . '/?$',
-		$base . '&lang=$matches[1]',
-		'top'
-	);
+	add_rewrite_rule( '^sustainability/' . $quoted . '/?$', 'index.php?page_id=' . (int) $base_id, 'top' );
+
+	foreach ( $languages as $lang_slug ) {
+		$lang_id = arkray_virtual_page_id_for_language( $base_id, $lang_slug );
+		add_rewrite_rule(
+			'^' . preg_quote( (string) $lang_slug, '#' ) . '/sustainability/' . $quoted . '/?$',
+			'index.php?page_id=' . (int) $lang_id . '&lang=' . rawurlencode( (string) $lang_slug ),
+			'top'
+		);
+	}
 }
 
 /**
- * Register rewrite rules so /sustainability/{slug}/ URLs resolve to matching pages.
+ * Register rewrite rules so /sustainability/{slug}/ URLs resolve to matching
+ * pages, each language prefix pointing at that language's own translated
+ * page (see {@see arkray_virtual_page_id_for_language()}).
  */
 function arkray_add_sustainability_rewrites() {
-	$lang_re = arkray_language_slugs_regex();
-	$map     = arkray_get_sustainability_public_page_map();
+	$map       = arkray_get_sustainability_public_page_map();
+	$languages = function_exists( 'pll_languages_list' ) ? (array) pll_languages_list( array( 'fields' => 'slug' ) ) : array();
 
 	foreach ( $map as $page_key => $config ) {
 		$page_id = arkray_get_sustainability_subpage_id( $page_key );
@@ -3353,11 +3525,16 @@ function arkray_add_sustainability_rewrites() {
 			continue;
 		}
 
-		$base = 'index.php?page_id=' . (int) $page_id;
-
 		if ( 'sustainability' === $page_key ) {
-			add_rewrite_rule( '^sustainability/?$', $base, 'top' );
-			add_rewrite_rule( '^(' . $lang_re . ')/sustainability/?$', $base . '&lang=$matches[1]', 'top' );
+			add_rewrite_rule( '^sustainability/?$', 'index.php?page_id=' . (int) $page_id, 'top' );
+			foreach ( $languages as $lang_slug ) {
+				$lang_id = arkray_virtual_page_id_for_language( $page_id, $lang_slug );
+				add_rewrite_rule(
+					'^' . preg_quote( (string) $lang_slug, '#' ) . '/sustainability/?$',
+					'index.php?page_id=' . (int) $lang_id . '&lang=' . rawurlencode( (string) $lang_slug ),
+					'top'
+				);
+			}
 			continue;
 		}
 
@@ -3374,7 +3551,7 @@ function arkray_add_sustainability_rewrites() {
 		}
 
 		foreach ( $rewrite_slugs as $slug ) {
-			arkray_add_sustainability_slug_rewrite( $slug, $base, $lang_re );
+			arkray_add_sustainability_slug_rewrite( $slug, $page_id, $languages );
 		}
 	}
 }
@@ -3382,19 +3559,134 @@ add_action( 'init', 'arkray_add_sustainability_rewrites', 21 );
 
 /**
  * Flush rewrite rules once so /sustainability/{slug}/ URLs resolve.
- * Re-run by deleting the `arkray_sustainability_public_rewrites_v2` option.
+ * Re-run by deleting the `arkray_sustainability_public_rewrites_v3` option.
+ *
+ * Bumped to v3: earlier versions baked a single page ID into every language's
+ * rewrite rule, so a translation added after the last flush was unreachable.
  */
 function arkray_flush_sustainability_rewrites_once() {
-	if ( get_option( 'arkray_sustainability_public_rewrites_v2' ) ) {
+	if ( get_option( 'arkray_sustainability_public_rewrites_v3' ) ) {
 		return;
 	}
 	if ( ! is_admin() || ! current_user_can( 'manage_options' ) ) {
 		return;
 	}
 	flush_rewrite_rules();
-	update_option( 'arkray_sustainability_public_rewrites_v2', 1 );
+	update_option( 'arkray_sustainability_public_rewrites_v3', 1 );
 }
 add_action( 'admin_init', 'arkray_flush_sustainability_rewrites_once' );
+
+/**
+ * Re-flush the About/Sustainability virtual-page rewrite rules whenever a
+ * page using one of their routed slugs is saved.
+ *
+ * The rules registered in {@see arkray_add_about_rewrites()} and
+ * {@see arkray_add_sustainability_rewrites()} are cached in the `rewrite_rules`
+ * option and only rebuilt on an explicit flush. Without this, a translation
+ * created for a routed page — whether through wp-admin or through the ARKRAY
+ * Translation Importer plugin, which links translations directly via the
+ * pll_set_post_language()/pll_save_post_translations() API and so never fires
+ * Polylang's own `pll_save_post` action — stays unreachable at its own
+ * language URL (visitors get redirected to the original language) until
+ * someone happens to trigger a flush.
+ *
+ * @param int     $post_id Post being saved.
+ * @param WP_Post $post    Post object.
+ * @return void
+ */
+function arkray_maybe_reflush_virtual_page_rewrites( $post_id, $post ) {
+	if ( wp_is_post_autosave( $post_id ) || wp_is_post_revision( $post_id ) ) {
+		return;
+	}
+	if ( ! ( $post instanceof WP_Post ) || 'page' !== $post->post_type || '' === $post->post_name ) {
+		return;
+	}
+
+	$maps = array( arkray_get_about_public_page_map(), arkray_get_sustainability_public_page_map() );
+	foreach ( $maps as $map ) {
+		foreach ( $map as $config ) {
+			if ( in_array( $post->post_name, $config['wp_slugs'], true ) ) {
+				flush_rewrite_rules();
+				return;
+			}
+		}
+	}
+}
+add_action( 'save_post_page', 'arkray_maybe_reflush_virtual_page_rewrites', 20, 2 );
+
+/**
+ * Whether the current request targets a virtual About or Sustainability page.
+ *
+ * @return bool
+ */
+function arkray_is_about_or_sustainability_virtual_request() {
+	$rel_path = arkray_get_request_relative_path();
+	if ( '' === $rel_path ) {
+		return false;
+	}
+
+	$segments = array_values( array_filter( explode( '/', $rel_path ), 'strlen' ) );
+	if ( function_exists( 'pll_languages_list' ) ) {
+		$langs = pll_languages_list( array( 'fields' => 'slug' ) );
+		if ( ! empty( $segments ) && in_array( $segments[0], $langs, true ) ) {
+			array_shift( $segments );
+		}
+	}
+
+	if ( empty( $segments ) ) {
+		return false;
+	}
+
+	$last_segment = sanitize_title( end( $segments ) );
+
+	if ( '' !== arkray_get_about_page_key_from_segment( $last_segment ) ) {
+		return true;
+	}
+
+	return '' !== arkray_get_sustainability_page_key_from_segment( $last_segment );
+}
+
+/**
+ * Keep WP core's own canonical redirect from bouncing About/Sustainability
+ * virtual pages to a different language.
+ *
+ * These pages are served through custom rewrite rules rather than a normal
+ * hierarchical permalink (see arkray_add_about_rewrites() /
+ * arkray_add_sustainability_rewrites()), and their `page_link` filters build
+ * the URL from the *current* display language rather than the queried post's
+ * own language. WP core's redirect_canonical() computes the "canonical" URL
+ * for the queried post via get_permalink() and 301s to it when it differs
+ * from the request; on a translated page that produced a mismatch and bounced
+ * visitors to the wrong language (e.g. a Vietnamese About page redirecting to
+ * its English original). Mirrors the existing Gallery-detail precedent below.
+ *
+ * @param string|false $redirect_url  Canonical redirect target.
+ * @param string       $requested_url Requested URL.
+ * @return string|false
+ */
+function arkray_preserve_about_virtual_canonical( $redirect_url, $requested_url ) {
+	if ( arkray_is_about_or_sustainability_virtual_request() ) {
+		return false;
+	}
+	return $redirect_url;
+}
+add_filter( 'redirect_canonical', 'arkray_preserve_about_virtual_canonical', 10, 2 );
+
+/**
+ * Keep Polylang's own canonical-URL check (PLL_Canonical::check_canonical_url())
+ * from bouncing About/Sustainability virtual pages to a different language,
+ * for the same reason as {@see arkray_preserve_about_virtual_canonical()}.
+ *
+ * @param string|false $redirect_url Redirect target.
+ * @return string|false
+ */
+function arkray_preserve_about_virtual_polylang_canonical( $redirect_url ) {
+	if ( arkray_is_about_or_sustainability_virtual_request() ) {
+		return false;
+	}
+	return $redirect_url;
+}
+add_filter( 'pll_check_canonical_url', 'arkray_preserve_about_virtual_polylang_canonical', 10, 1 );
 
 /**
  * Redirect legacy Sustainability URLs to canonical /sustainability/{slug}/ paths.

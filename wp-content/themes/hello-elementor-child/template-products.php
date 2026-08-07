@@ -456,7 +456,7 @@ $current_product_slug = '';
 								$_sp_url    = $pcat['link'] ?: $products_page_url;
 								$_sp_is_ext = $_sp_url && 0 !== strpos( $_sp_url, home_url() ) && 0 === strpos( $_sp_url, 'http' );
 							?>
-							<li><a href="<?php echo esc_url( $_sp_url ); ?>"<?php echo $_sp_is_ext ? ' target="_blank" class="product_link"' : ''; ?>><?php echo esc_html( $pcat['title'] ); ?></a></li>
+							<li><a href="<?php echo esc_url( $_sp_url ); ?>"<?php echo $_sp_is_ext ? ' target="_blank" class="product_link"' : ''; ?>><?php echo esc_html( arkray_t( $pcat['title'] ) ); ?></a></li>
 							<?php endforeach; ?>
 						</ul>
 					</li>
@@ -506,7 +506,7 @@ if ( $active_pcat_slug ) {
 					$_pcat_target     = $_pcat_is_ext ? ' target="_blank"' : '';
 				?>
 					<li>
-						<a href="<?php echo esc_url( $_pcat_menu_url ); ?>"<?php echo $_pcat_target . $_pcat_class_attr; ?>><?php echo esc_html( $pcat['title'] ); ?></a>
+						<a href="<?php echo esc_url( $_pcat_menu_url ); ?>"<?php echo $_pcat_target . $_pcat_class_attr; ?>><?php echo esc_html( arkray_t( $pcat['title'] ) ); ?></a>
 						<?php if ( ! empty( $pcat['sections'] ) ) : ?>
 							<ul<?php echo $_pcat_active ? ' style="display: block;"' : ''; ?>>
 								<?php foreach ( $pcat['sections'] as $section ) : ?>
@@ -550,7 +550,7 @@ if ( $active_pcat_slug ) {
 
 	<?php if ( $active_pcat ) : ?>
 		<div id="content_area">
-			<h1 class="h1_index"><?php echo esc_html( $active_pcat['title'] ); ?></h1>
+			<h1 class="h1_index"><?php echo esc_html( arkray_t( $active_pcat['title'] ) ); ?></h1>
 
 			<?php
 			// Optional category-level intro HTML stored on the term description
@@ -704,7 +704,7 @@ if ( $active_pcat_slug ) {
 					$pcat_is_ext  = $pcat_link && 0 !== strpos( $pcat_link, home_url() ) && 0 === strpos( $pcat_link, 'http' );
 				?>
 					<div class="box">
-						<h3><a href="<?php echo esc_url( $pcat_link ); ?>"<?php echo $pcat_is_ext ? ' target="_blank"' : ''; ?>><?php echo esc_html( $pcat['title'] ); ?></a></h3>
+						<h3><a href="<?php echo esc_url( $pcat_link ); ?>"<?php echo $pcat_is_ext ? ' target="_blank"' : ''; ?>><?php echo esc_html( arkray_t( $pcat['title'] ) ); ?></a></h3>
 						<div class="lineup_list">
 							<div class="list">
 								<?php foreach ( $pcat['sections'] as $section ) : ?>
@@ -729,7 +729,7 @@ if ( $active_pcat_slug ) {
 							</div>
 							<div class="img">
 								<?php if ( $pcat_image ) : ?>
-									<p><a href="<?php echo esc_url( $pcat_link ); ?>"<?php echo $pcat_is_ext ? ' target="_blank"' : ''; ?>><img src="<?php echo esc_url( $pcat_image ); ?>" alt="<?php echo esc_attr( $pcat['title'] ); ?>" width="120"></a></p>
+									<p><a href="<?php echo esc_url( $pcat_link ); ?>"<?php echo $pcat_is_ext ? ' target="_blank"' : ''; ?>><img src="<?php echo esc_url( $pcat_image ); ?>" alt="<?php echo esc_attr( arkray_t( $pcat['title'] ) ); ?>" width="120"></a></p>
 								<?php endif; ?>
 							</div>
 						</div>
@@ -741,10 +741,10 @@ if ( $active_pcat_slug ) {
 		<h2 class="h2_content pt30"><?php echo esc_html( arkray_t( 'History of Pioneers' ) ); ?></h2>
 		<div id="editor_area">
 			<ul>
-				<li><a href="<?php echo esc_url( arkray_get_history_page_url( 'diabetes-testing' ) ); ?>">Diabetes testing</a></li>
-				<li><a href="<?php echo esc_url( arkray_get_history_page_url( 'urinalysis' ) ); ?>">Urinalysis</a></li>
-				<li><a href="<?php echo esc_url( arkray_get_history_page_url( 'dry-chemistry-testing' ) ); ?>">Dry Chemistry Testing</a></li>
-				<li><a href="<?php echo esc_url( arkray_get_history_page_url( 'bgm' ) ); ?>">BGM</a></li>
+				<li><a href="<?php echo esc_url( arkray_get_history_page_url( 'diabetes-testing' ) ); ?>"><?php echo esc_html( arkray_t( 'Diabetes testing' ) ); ?></a></li>
+				<li><a href="<?php echo esc_url( arkray_get_history_page_url( 'urinalysis' ) ); ?>"><?php echo esc_html( arkray_t( 'Urinalysis' ) ); ?></a></li>
+				<li><a href="<?php echo esc_url( arkray_get_history_page_url( 'dry-chemistry-testing' ) ); ?>"><?php echo esc_html( arkray_t( 'Dry Chemistry Testing' ) ); ?></a></li>
+				<li><a href="<?php echo esc_url( arkray_get_history_page_url( 'bgm' ) ); ?>"><?php echo esc_html( arkray_t( 'BGM' ) ); ?></a></li>
 			</ul>
 		</div>
 

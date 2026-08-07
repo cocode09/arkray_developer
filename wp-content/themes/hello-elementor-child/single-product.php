@@ -251,7 +251,7 @@ add_filter( 'the_content', 'wpautop' ); // restore for other parts of the page
 							$_sp_url    = $pcat['link'] ?: $products_page_url;
 							$_sp_is_ext = $_sp_url && 0 !== strpos( $_sp_url, home_url() ) && 0 === strpos( $_sp_url, 'http' );
 						?>
-							<li><a href="<?php echo esc_url( $_sp_url ); ?>"<?php echo $_sp_is_ext ? ' target="_blank" class="product_link"' : ''; ?>><?php echo esc_html( $pcat['title'] ); ?></a></li>
+							<li><a href="<?php echo esc_url( $_sp_url ); ?>"<?php echo $_sp_is_ext ? ' target="_blank" class="product_link"' : ''; ?>><?php echo esc_html( arkray_t( $pcat['title'] ) ); ?></a></li>
 						<?php endforeach; ?>
 					</ul>
 				</li>
@@ -276,7 +276,7 @@ add_filter( 'the_content', 'wpautop' ); // restore for other parts of the page
 					$pcat_active  = $current_cat && $current_cat->slug === $pcat['slug'];
 				?>
 					<li>
-						<a href="<?php echo esc_url( $pcat_url ); ?>"<?php echo $pcat_active ? ' class="ac"' : ( $pcat_is_ext ? ' target="_blank" class="product_link"' : '' ); ?>><?php echo esc_html( $pcat['title'] ); ?></a>
+						<a href="<?php echo esc_url( $pcat_url ); ?>"<?php echo $pcat_active ? ' class="ac"' : ( $pcat_is_ext ? ' target="_blank" class="product_link"' : '' ); ?>><?php echo esc_html( arkray_t( $pcat['title'] ) ); ?></a>
 						<?php if ( ! empty( $pcat['sections'] ) ) : ?>
 							<ul<?php echo $pcat_active ? ' style="display: block;"' : ''; ?>>
 								<?php foreach ( $pcat['sections'] as $section ) : ?>

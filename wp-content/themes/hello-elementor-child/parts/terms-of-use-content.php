@@ -1,10 +1,10 @@
 <?php
 /**
- * Website Terms of Use — #editor_area content.
+ * Website Terms of Use — #editor_area body content (no page title).
  *
- * Verbatim port of the #editor_area block from the ARKRAY Terms of Use
- * reference page (Sandbox - terms of use/Website Terms of Use _ ARKRAY, Inc..html).
- * Classes h1_index, h2_content, tx are styled by assets/arkray-content.css.
+ * The H1 comes from the WordPress page Title field via template-terms-of-use.php.
+ * Verbatim port of the #editor_area body from the ARKRAY Terms of Use reference
+ * page. Classes h2_content, tx are styled by assets/arkray-content.css.
  *
  * This partial is only included when the WordPress page body is empty, so the
  * admin can override every word via Pages > Website Terms of Use > Edit.
@@ -16,7 +16,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 ?>
-<h1 class="h1_index">Website Terms of Use</h1>
 <p class="tx">Please read the following Terms of Use and agree to them before using this website. By using this website, you acknowledge that you have read and agreed to this Terms of Use. If you do not agree to this Terms of Use, you may not use this website.</p>
 <h2 class="h2_content">Copyrights</h2>
 <p class="tx">All copyrights for the content on this website (including, but not limited to text, photographs, graphics, videos and sound ("Content")) belong to ARKRAY, our affiliates or third parties and are protected by Japanese copyright law, international conventions and other copyright laws. Except for the copy/citation for personal use permitted by those laws, this website and Content shall not be copied, reproduced, republished or distributed without authorization.</p>

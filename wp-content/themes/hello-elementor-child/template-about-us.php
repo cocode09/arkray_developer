@@ -118,16 +118,34 @@ $config_at             = (int) get_post_meta( $content_id, '_arkray_external_con
 $modified_at           = ( $content_page instanceof WP_Post ) ? strtotime( $content_page->post_modified_gmt ) : 0;
 $editor_saved_after_import_settings = $config_at > 0 && $modified_at > ( $config_at + 5 );
 
-if ( ! $has_import_source && $import_settings_saved && ! $editor_saved_after_import_settings ) {
-	// Cleared import URL — ignore stale migration placeholders until the page editor
-	// is saved again after the External Content settings were updated.
-	$uses_editor_content = true;
-	$about_body_html     = '';
-} elseif ( '' !== trim( $editor_html ) ) {
-	// Imported editor_area markup is already complete HTML. Running wpautop
-	// here would make the public body differ from what the admin edits.
+if ( '' !== trim( $editor_html ) ) {
+	// Page editor content always wins. Clearing the External Content URL must
+	// not hide an already-authored landing grid or sub-page body.
 	$about_body_html     = do_shortcode( $editor_html );
 	$uses_editor_content = true;
+
+	// Contact / ARKRAY Group pages keep the Title field as the only heading —
+	// drop a duplicate leading <h1> from the editor body.
+	$title_only_slugs = array_merge(
+		array( 'about-contact' ),
+		function_exists( 'arkray_get_group_about_page_keys' )
+			? arkray_get_group_about_page_keys()
+			: array( 'arkray-group', 'arkray-group-2', 'arkray-group-3', 'arkray-group-4', 'arkray-group-5' )
+	);
+	if ( in_array( $about_slug, $title_only_slugs, true ) ) {
+		$about_body_html = function_exists( 'arkray_strip_leading_h1_html' )
+			? arkray_strip_leading_h1_html( $about_body_html )
+			: preg_replace( '#^\s*(?:<!--.*?-->\s*)*<h1\b[^>]*>.*?</h1>\s*#is', '', $about_body_html, 1 );
+		$page_title = get_the_title( $content_id );
+		if ( '' !== trim( (string) $page_title ) ) {
+			$about_h1_title = $page_title;
+		}
+	}
+} elseif ( ! $has_import_source && $import_settings_saved && ! $editor_saved_after_import_settings ) {
+	// Cleared import URL with an empty editor — do not fall back to cached
+	// external content or legacy page-9 postmeta placeholders.
+	$uses_editor_content = true;
+	$about_body_html     = '';
 } elseif ( $content_page instanceof WP_Post && strtotime( $content_page->post_modified_gmt ) > strtotime( $content_page->post_date_gmt ) + 60 ) {
 	// Page was updated after its initial publish with an empty editor.
 	// Only treat that as an intentional blank override when no import source
@@ -327,13 +345,18 @@ wp_head();
 
 			<?php endif; ?>
 		<?php elseif ( ( 'about-us' === $about_slug || ! $body_has_h1 ) && 'history' !== $about_slug && ! $show_group_map ) : ?>
-			<h1 class="h1_about"><?php echo esc_html( $about_h1_title ); ?></h1>
+			<?php
+			// Landing uses .h1_about; Contact and other sub-pages use .h1_index
+			// to match the original about/*.html heading style.
+			$about_h1_class = ( 'about-us' === $about_slug ) ? 'h1_about' : 'h1_index';
+			?>
+			<h1 class="<?php echo esc_attr( $about_h1_class ); ?>"><?php echo esc_html( $about_h1_title ); ?></h1>
 
 		<?php endif; ?>
 
-		<?php if ( ! $has_external && 'about-us' === $about_slug && $uses_editor_content && '' !== $about_body_html ) : ?>
+		<?php if ( ! $has_external && 'about-us' === $about_slug && '' !== trim( $about_body_html ) ) : ?>
 			<?php echo $about_body_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- admin-authored page content. ?>
-		<?php elseif ( ! $has_external && 'about-us' === $about_slug && ! $uses_editor_content ) : ?>
+		<?php elseif ( ! $has_external && 'about-us' === $about_slug ) : ?>
 			<?php // ── Landing fallback grid when the page editor is empty ──────── ?>
 			<div class="about_index cf">
 				<div class="column">

@@ -37,13 +37,7 @@ $logo_src       = $custom_logo_id
 <meta name="format-detection" content="telephone=no">
 <meta content="width=device-width, initial-scale=1.0" name="viewport">
 <meta name="description" content="<?php bloginfo( 'description' ); ?>">
-<?php
-add_filter( 'document_title_parts', static function ( $parts ) {
-	$parts['title'] = 'ARKRAY Privacy Policy';
-	return $parts;
-} );
-wp_head();
-?>
+<?php wp_head(); ?>
 </head>
 <body class="arkray-inner arkray-privacy-page">
 <?php wp_body_open(); ?>
@@ -108,8 +102,18 @@ wp_head();
 	<div id="content_area">
 		<div id="editor_area">
 			<?php
+			// Page title from the admin Title field — not duplicated in post_content.
+			$page_title = get_the_title();
+			if ( '' === trim( (string) $page_title ) ) {
+				$page_title = arkray_t( 'Privacy Policy' );
+			}
+			?>
+			<h1 class="h1_index"><?php echo esc_html( $page_title ); ?></h1>
+			<?php
 			$post_body = trim( (string) get_post_field( 'post_content', get_the_ID() ) );
 			if ( '' !== $post_body ) {
+				// Drop a leading content H1 so the admin Title is the only page heading.
+				$post_body = preg_replace( '#^\s*<h1\b[^>]*>.*?</h1>\s*#is', '', $post_body, 1 );
 				echo apply_filters( 'the_content', $post_body );
 			} else {
 				include get_stylesheet_directory() . '/parts/privacy-policy-content.php';

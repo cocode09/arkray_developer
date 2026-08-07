@@ -1,10 +1,11 @@
 <?php
 /**
- * Privacy Policy — #editor_area content.
+ * Privacy Policy — #editor_area body content (no page title).
  *
+ * The H1 comes from the WordPress page Title field via template-privacy-policy.php.
  * English sections from ARKRAY Vietnam Personal Data Protection Policy Notice
- * (vn_privacy_policy.pdf). Classes h1_index, h2_content, h3_content, tx,
- * indent01, indent02 are styled by assets/arkray-content.css.
+ * (vn_privacy_policy.pdf). Classes h2_content, h3_content, tx, indent01,
+ * indent02 are styled by assets/arkray-content.css.
  *
  * @package HelloElementorChild
  */
@@ -13,8 +14,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 ?>
-<h1 class="h1_index">ARKRAY Privacy Policy</h1>
-
 <p class="tx">Dear Esteemed Customer,</p>
 
 <p class="tx">ARKRAY VIET NAM Co., ltd (hereinafter referred to as &ldquo;Arkray&rdquo;) would like to express herewith our sincere thanks to your kind support to Arkray so far.</p>

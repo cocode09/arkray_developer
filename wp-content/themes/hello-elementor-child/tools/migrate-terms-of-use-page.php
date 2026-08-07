@@ -18,8 +18,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 // ── Default page body — mirrors parts/terms-of-use-content.php ────────────
 // Stored as post_content so the admin can edit it directly in WordPress.
+// Body only — the H1 is rendered from the page Title field by the template.
 $default_content = <<<'HTML'
-<h1 class="h1_index">Website Terms of Use</h1>
 <p class="tx">Please read the following Terms of Use and agree to them before using this website. By using this website, you acknowledge that you have read and agreed to this Terms of Use. If you do not agree to this Terms of Use, you may not use this website.</p>
 <h2 class="h2_content">Copyrights</h2>
 <p class="tx">All copyrights for the content on this website (including, but not limited to text, photographs, graphics, videos and sound ("Content")) belong to ARKRAY, our affiliates or third parties and are protected by Japanese copyright law, international conventions and other copyright laws. Except for the copy/citation for personal use permitted by those laws, this website and Content shall not be copied, reproduced, republished or distributed without authorization.</p>
